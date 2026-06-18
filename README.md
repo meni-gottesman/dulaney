@@ -1,7 +1,18 @@
-# Nevis Affair — McKenna &amp; Jaden
+# The Dulaney Wedding — Jaden &amp; McKenna
 
 A cinematic, editorial wedding website for an intimate destination wedding at the
-**Four Seasons Resort Nevis**, Saturday **14 November 2026**.
+**Four Seasons, Nevis** (West Indies), **May 6–10, 2027** — ceremony Saturday, May 8.
+Built to reflect the printed invitation: *Bon Voyage · For a select few*.
+
+### 🌐 Live
+**https://meni-gottesman.github.io/dulaney/**
+Source repo: `github.com/meni-gottesman/dulaney` (GitHub Pages, `main` branch).
+The printed invitation lists **www.dulaneys.com** — see *Connecting dulaneys.com* below
+to point that domain here.
+
+> Details on this site are taken from the invitation. A couple of inferred items
+> (name order, the exact ceremony day, the day‑by‑day itinerary) are flagged at the
+> bottom — please confirm them.
 
 It reuses the theme and content from your Lovable "Nevis Affair" project (warm
 ivory/ink palette with a quiet **Caribbean‑blue** accent, Cormorant Garamond + Jost,
@@ -41,6 +52,27 @@ anywhere static (Netlify, Vercel, GitHub Pages, S3, …).
 > Note: on macOS, a server *launched from inside Claude* can't read `~/Desktop`
 > due to privacy protections — that's why the live preview was served from a copy
 > in `/tmp`. Running the command yourself in Terminal works fine.
+
+---
+
+## Update the live site
+
+The site is hosted on **GitHub Pages** from this folder's git repo. To publish a change:
+
+```
+cd nevis-affair
+# edit index.html / swap an asset…
+git add -A && git commit -m "update" && git push
+```
+
+GitHub rebuilds in ~1 minute → https://meni-gottesman.github.io/dulaney/
+
+### Connecting dulaneys.com (the URL on the invitation)
+1. In the repo → **Settings → Pages → Custom domain**, enter `www.dulaneys.com` (or `dulaneys.com`) and save. (This writes a `CNAME` file.)
+2. At your domain registrar, add DNS:
+   - `www` → **CNAME** → `meni-gottesman.github.io`
+   - apex `dulaneys.com` → four **A** records: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
+3. Back in Pages, tick **Enforce HTTPS** once the cert issues (a few minutes).
 
 ---
 
@@ -92,20 +124,23 @@ ring around the control bottom‑right hints at it on entry, and a guest's choic
 remembered across visits. To greet guests with music instead, change the default in
 `startAudio()` from `"off"` back to `"on"`.
 
-### 5. Registry links
-In the **Registry** section, replace the `href="#"` values with your real registry URLs.
+### 5. Registry links — still placeholders ⚠️
+The invitation didn't include registry info, so the two **Registry** links point at
+`#registry` (a harmless no‑op). Replace them with real URLs when ready, or remove the
+section. (Marked `SWAP:` in the code.)
 
 ### 6. RSVP backend (currently client‑side)
 RSVPs are stored in the browser's `localStorage` and a confirmation is shown. To
 collect them for real, edit `submitRSVP(data)` (marked `--- INTEGRATION HOOK ---`)
-to `POST` `data` to your endpoint — e.g. your Lovable/Supabase function, a Google
-Form/Sheet, Formspree, or a simple serverless function. The `data` object contains:
-`guestName, guestEmail, attending, guests, meal, cries, note`.
+to `POST` `data` to your endpoint — e.g. a Google Form/Sheet, Formspree, or your
+existing Lovable/Supabase function. The `data` object contains:
+`guestName, guestEmail, attending, guests, meal, note`.
 
-### 7. Accommodations email
-The Stay section shows a placeholder booking address
-(`reservations@fourseasons-nevis.example`). Replace it with the resort's real
-reservations contact before sharing.
+### 7. Contacts (from the invitation — already wired)
+Pulled straight from the printed suite: **Resort — Lynn Vosloo · 239.628.6269**
+(Stay section, tappable `tel:` link) and **Flight — Brett Lafleur · 402.677.6578**
+(Travel section). Update these two if they change. Room block is held under **Dulaney**,
+reserve by **July 23, 2026**.
 
 ---
 
