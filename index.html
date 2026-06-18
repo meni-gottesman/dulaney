@@ -129,7 +129,16 @@
       </div>
     </div>
 
-    <p class="savedate__revealed" id="savedateRevealed" aria-live="polite">Saturday &mdash; the vows, as the light turns gold.</p>
+    <!-- Revealed only once all three hearts are scratched, so the countdown
+         can't give the date away before the guest uncovers it. -->
+    <div class="savedate__revealed" id="savedateRevealed" aria-live="polite">
+      <p class="savedate__line">Saturday &mdash; the vows, as the light turns gold.</p>
+      <div class="countdown" id="countdown" aria-label="Time until the ceremony">
+        <div class="count"><b data-cd="days">&mdash;&mdash;</b><span>Days</span></div>
+        <div class="count"><b data-cd="hours">&mdash;&mdash;</b><span>Hours</span></div>
+        <div class="count"><b data-cd="mins">&mdash;&mdash;</b><span>Minutes</span></div>
+      </div>
+    </div>
 
     <p class="savedate__more reveal d2">
       <a href="details.html">The details &rarr;</a>

@@ -480,12 +480,20 @@ body.entered .hero__date { opacity: 1; transform: translateY(0); }
 @keyframes heart-beat { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 
 .savedate__revealed {
-  margin: clamp(2rem, 5vw, 3rem) auto 0; max-width: 30ch;
-  font-family: var(--font-display); font-style: italic; font-weight: 300;
-  font-size: clamp(1.3rem, 4.5vw, 1.9rem); line-height: 1.3; color: var(--ink);
+  margin: clamp(2rem, 5vw, 3rem) auto 0;
   opacity: 0; transform: translateY(12px); transition: opacity 1.1s ease, transform 1.1s ease;
 }
 .savedate__revealed.revealed { opacity: 1; transform: translateY(0); }
+.savedate__line {
+  margin: 0 auto; max-width: 30ch;
+  font-family: var(--font-display); font-style: italic; font-weight: 300;
+  font-size: clamp(1.3rem, 4.5vw, 1.9rem); line-height: 1.3; color: var(--ink);
+}
+/* Countdown — appears with the reveal (the date is already uncovered by then). */
+.countdown { display: flex; flex-wrap: wrap; gap: clamp(1.4rem, 6vw, 3.2rem); justify-content: center; margin-top: clamp(1.8rem, 5vw, 2.8rem); }
+.count { display: grid; gap: 0.5rem; min-width: 64px; }
+.count b { font-family: var(--font-display); font-weight: 300; font-size: clamp(2.2rem, 7vw, 3.4rem); line-height: 1; font-variant-numeric: tabular-nums; color: var(--ink); }
+.count span { font-family: var(--font-sans); text-transform: uppercase; letter-spacing: 0.28em; font-size: 0.56rem; color: var(--muted-fg); }
 
 /* ============================================================================
    ITINERARY (timeline)
