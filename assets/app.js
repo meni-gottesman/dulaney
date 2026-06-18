@@ -261,119 +261,114 @@
     io.observe(cbg.closest(".closing") || cbg);
   })();
 
-  /* ---------- COUNTDOWN ---------- */
-  // Ceremony: Saturday, 8 May 2027, 4:00 PM Atlantic Standard Time (UTC−04:00).
-  const target = new Date("2027-05-08T16:00:00-04:00").getTime();
-  const cd = {
-    days: $('[data-cd="days"]'), hours: $('[data-cd="hours"]'),
-    mins: $('[data-cd="mins"]'),
-  };
-  const pad = (n) => String(n).padStart(2, "0");
-  let cdTimer = null;
-  function tick() {
-    const diff = target - Date.now();
-    if (diff <= 0) {
-      const cdEl = $("#countdown");
-      if (cdEl) {
-        // During the wedding day itself, celebrate; afterwards, settle into a keepsake.
-        const dayMsg = diff > -86400000
-          ? "Today is the day. ✦"
-          : "Married on the island · May 8, 2027 · bon voyage";
-        cdEl.innerHTML = '<p class="lede" style="margin:0">' + dayMsg + "</p>";
+  /* ---------- SAVE THE DATE — three hearts, scratch to reveal ----------
+     Each heart hides one of Day · Month · Year; scratch (or Enter) clears the
+     ocean-toned cover. When all three are open, the line beneath fades in.
+     No countdown — the date stays a surprise until the guest uncovers it. */
+  (function saveTheDate() {
+    const hearts = $("#hearts");
+    if (!hearts) return;
+    const cue = $("#heartsCue");
+    const revealedLine = $("#savedateRevealed");
+    const canvases = $$(".heart__cover", hearts);
+    if (!canvases.length) return;
+
+    let openedCount = 0;
+    function onHeartOpen() {
+      if (++openedCount < canvases.length) return;
+      hearts.classList.add("unlocked");
+      if (cue) cue.style.opacity = "0";
+      if (revealedLine) revealedLine.classList.add("revealed");
+    }
+
+    function makeHeart(canvas) {
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      let dpr = Math.min(window.devicePixelRatio || 1, 2);
+      let drawing = false, cleared = false, samples = 0, painted = false;
+
+      function paint() {
+        const w = canvas.clientWidth, h = canvas.clientHeight;
+        if (!w || !h) return false;
+        canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.globalCompositeOperation = "source-over";
+        const g = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        g.addColorStop(0, "#2f5d6b"); g.addColorStop(1, "#21424c"); // Caribbean-toned cover
+        ctx.fillStyle = g; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.globalCompositeOperation = "destination-out";
+        painted = true; return true;
       }
-      if (cdTimer) clearInterval(cdTimer); // stop the per-second timer for good
-      return;
-    }
-    const d = Math.floor(diff / 86400000);
-    const h = Math.floor((diff % 86400000) / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    cd.days.textContent = pad(d); cd.hours.textContent = pad(h);
-    cd.mins.textContent = pad(m);
-  }
-  if (cd.days) { tick(); cdTimer = setInterval(tick, 30000); } // calm, not a frantic per-second tick
+      function posOf(e) {
+        const r = canvas.getBoundingClientRect();
+        const p = e.touches ? e.touches[0] : e;
+        return { x: (p.clientX - r.left) * dpr, y: (p.clientY - r.top) * dpr };
+      }
+      function scratch(e) {
+        if (!drawing || cleared || !painted) return;
+        if (e.cancelable && e.type === "touchmove") e.preventDefault();
+        const { x, y } = posOf(e);
+        ctx.beginPath(); ctx.arc(x, y, canvas.width * 0.24, 0, Math.PI * 2); ctx.fill();
+        if (++samples % 4 === 0) check();
+      }
+      function check() {
+        if (cleared) return;
+        const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        let clear = 0, total = 0;
+        for (let i = 3; i < data.length; i += 64) { total++; if (data[i] < 128) clear++; }
+        if (clear / total > 0.5) reveal();
+      }
+      function reveal() {
+        if (cleared) return;
+        cleared = true;
+        canvas.classList.add("is-cleared");
+        onHeartOpen();
+      }
 
-  /* ---------- SCRATCH TO REVEAL (Save the Date) ---------- */
-  (function scratchToReveal() {
-    const canvas = $("#scratch");
-    if (!canvas) return;
-    const hint = $("#scratchHint");
-    const ctx = canvas.getContext("2d", { willReadFrequently: true });
-    let dpr = Math.min(window.devicePixelRatio || 1, 2);
-    let painting = false, cleared = false, painted = false, samples = 0;
+      canvas.addEventListener("pointerdown", function (e) {
+        drawing = true; try { canvas.setPointerCapture(e.pointerId); } catch (x) {}
+        scratch(e);
+      });
+      canvas.addEventListener("pointermove", scratch);
+      canvas.addEventListener("pointerup", function () { drawing = false; });
+      canvas.addEventListener("pointercancel", function () { drawing = false; });
+      canvas.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); reveal(); }
+      });
 
-    // Work entirely in device pixels (identity transform) so coverage is correct
-    // regardless of any leftover transform state.
-    function paintCover() {
-      const w = canvas.clientWidth, h = canvas.clientHeight;
-      if (!w || !h) return;
-      const W = canvas.width = Math.round(w * dpr), H = canvas.height = Math.round(h * dpr);
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.globalCompositeOperation = "source-over";
-      const g = ctx.createLinearGradient(0, 0, W, H);
-      g.addColorStop(0, "#2c2823"); g.addColorStop(0.5, "#3a352d"); g.addColorStop(1, "#241f18");
-      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-      const s = ctx.createLinearGradient(0, 0, W, H);
-      s.addColorStop(0.38, "rgba(255,255,255,0)");
-      s.addColorStop(0.5, "rgba(255,255,255,0.06)");
-      s.addColorStop(0.62, "rgba(255,255,255,0)");
-      ctx.fillStyle = s; ctx.fillRect(0, 0, W, H);
-      ctx.globalCompositeOperation = "destination-out";
-      painted = true;
-    }
-    function pos(e) {
-      const r = canvas.getBoundingClientRect();
-      const p = e.touches ? e.touches[0] : e;
-      // CSS coords → device pixels
-      return { x: (p.clientX - r.left) * dpr, y: (p.clientY - r.top) * dpr };
-    }
-    function scratchAt(e) {
-      if (!painting || cleared) return;
-      const { x, y } = pos(e);
-      ctx.beginPath(); ctx.arc(x, y, 30 * dpr, 0, Math.PI * 2); ctx.fill();
-      maybeReveal();
-    }
-    function maybeReveal() {
-      samples++;
-      if (samples % 6 !== 0) return;
-      const img = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-      let clear = 0, total = 0;
-      for (let i = 3; i < img.length; i += 64) { total++; if (img[i] === 0) clear++; }
-      if (clear / total > 0.45) revealAll();
-    }
-    function revealAll() {
-      if (cleared) return;
-      cleared = true;
-      canvas.classList.add("is-cleared");
-      if (hint) { hint.textContent = "We hope you’ll be there"; }
+      return {
+        paint: paint,
+        repaint: function () { if (!cleared) paint(); },
+        setDpr: function () { dpr = Math.min(window.devicePixelRatio || 1, 2); },
+        reveal: reveal,
+      };
     }
 
-    if (prefersReduced) {
-      canvas.classList.add("is-cleared"); cleared = true;
-      if (hint) hint.textContent = "We hope you’ll be there";
-      return;
-    }
-    // Paint the cover immediately (it's just a gradient — no fonts needed), retrying
-    // until the canvas has a real size; then repaint once the display font settles,
-    // since the underlying date block may have reflowed to a new size.
-    function ensurePainted() {
-      paintCover();
-      if (!painted) requestAnimationFrame(ensurePainted);
-    }
-    requestAnimationFrame(ensurePainted);
-    if (document.fonts) document.fonts.ready.then(() => { if (!cleared) paintCover(); });
+    const cards = canvases.map(makeHeart);
 
-    const start = (e) => { painting = true; scratchAt(e); };
-    canvas.addEventListener("pointerdown", start);
-    canvas.addEventListener("pointermove", scratchAt);
-    window.addEventListener("pointerup", () => { painting = false; });
-    canvas.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); revealAll(); }
-    });
+    // Reduced motion: skip the ritual, show the date straight away.
+    if (prefersReduced) { cards.forEach(function (c) { c.reveal(); }); return; }
+
+    // Paint the covers once the hearts are laid out & in view (real canvas size).
+    let allPainted = false;
+    function paintAll() {
+      if (allPainted) return;
+      let ok = true;
+      cards.forEach(function (c) { if (!c.paint()) ok = false; });
+      if (ok) allPainted = true;
+    }
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) { if (en.isIntersecting) { paintAll(); if (allPainted) io.disconnect(); } });
+      }, { threshold: 0.2 });
+      io.observe(hearts);
+    }
+    requestAnimationFrame(paintAll);
+    if (document.fonts) document.fonts.ready.then(paintAll);
+
     let rT;
-    window.addEventListener("resize", () => {
-      if (cleared || !painted) return;
+    window.addEventListener("resize", function () {
       clearTimeout(rT);
-      rT = setTimeout(() => { dpr = Math.min(window.devicePixelRatio || 1, 2); paintCover(); }, 200);
+      rT = setTimeout(function () { cards.forEach(function (c) { c.setDpr(); c.repaint(); }); }, 200);
     });
   })();
 
