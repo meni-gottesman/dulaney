@@ -93,28 +93,31 @@ GitHub rebuilds in ~1 minute → https://meni-gottesman.github.io/dulaney/
 All edits are plain HTML/CSS in `index.html`. Search for these markers:
 
 ### 1. Names, dates, copy, itinerary
-All text is written directly in the page sections (Hero, Invitation, Welcome,
-Destination, Travel, Stay, Dress Code, Itinerary, Registry, RSVP, Closing). Edit in
-place. The ceremony countdown target lives in the script:
+Text lives directly in each page. **`index.html`** holds the home copy — Hero,
+Save‑the‑Date (the scratch reveal), RSVP and the Closing. **`details.html`** holds
+Itinerary, Travel, Stay, Dress code and Registry. Edit in place. The ceremony
+countdown target lives in `assets/app.js`:
 ```js
-const target = new Date("2026-11-14T17:00:00-04:00").getTime(); // 5pm AST
+const target = new Date("2027-05-08T16:00:00-04:00").getTime(); // 4pm AST, Sat May 8
 ```
 
 ### 2. Engagement photos (already integrated)
-The real engagement photos are wired in and live in `assets/`:
+Every photo is **only of the two of them** — chosen deliberately, none of empty
+scenery. The set lives in `assets/`:
 
-| File | Where it's used |
-|---|---|
-| `hero.jpg` | Full-screen hero (the yacht at golden hour) |
-| `g1.jpg … g8.jpg` | The "A Glimpse of Us" masonry gallery |
-| `closing.jpg` | The "We'll see you on the island" footer |
+| File | Source | Where it's used / why |
+|---|---|---|
+| `hero.jpg` / `hero-m.jpg` | 1645 | Full‑screen hero — the couple on the bow as a **dolphin surfaces** below them. The "wow": intimacy, a wild moment, and open water. Type sits in the lower third over that water; on phones (the QR target) the dolphin is in frame. |
+| `closing.jpg` | 1664 | The "We'll see you on the island" footer — the two of them facing the horizon. Cropped at 28% from top so the couple read against the sky. |
+| `g1 … g6` | 0420 · 0086 · 0942 · 0320 · 1932 · 0778 | Gallery, sequenced as an arc — *the place → tenderness → joy → golden romance → a still portrait → present, to camera* — with colour and black‑and‑white alternating. None repeat the hero/closing bow‑embrace. |
 
-All were resized/compressed for fast mobile loading (long-edge ~1600–2200px,
-~2.6 MB for the whole set; the gallery lazy-loads as you scroll). The originals
-remain untouched in your Downloads zip.
+All were resized/compressed for fast mobile loading (long edge 1500–2400px,
+~2.3 MB for the whole set; the gallery lazy‑loads as you scroll). The originals
+remain untouched in your `Dulaney Engagement.zip`.
 
-- **Swap the hero:** replace `assets/hero.jpg` (a landscape ~2000px image works best),
-  or point `--hero-photo` in `:root` at a different file.
+- **Swap the hero:** replace `assets/hero.jpg` **and** `assets/hero-m.jpg` (a **portrait**
+  image works best — the type sits in the lower third, so leave room there). Keep the
+  `srcset`/`width`/`height` on the hero `<img>` in `index.html` matching the new sizes.
 - **Swap a gallery photo:** replace the corresponding `assets/gN.jpg`. To add/remove
   tiles, edit the `<img>` list in the **Gallery** section (the masonry reflows
   automatically). Keep the `width`/`height` attributes roughly matching the new
@@ -167,7 +170,7 @@ reserve by **July 23, 2026**.
 | `--turquoise` | `0.66 0.066 192` | accent |
 | `--palm` | `0.45 0.05 152` | accent |
 
-Fonts: **Cormorant Garamond** (display) + **Jost** (labels/UI). Radius `0.25rem`.
-Dark mode, mobile‑first, and reduced‑motion are all supported.
-
-See `SPEC.md` for the full content + design source of truth.
+Fonts: **Cormorant Garamond** (display) + **Jost** (labels/UI). Corners are square
+(`--radius: 0`) for a crisp, editorial feel. The palette is **locked to one light
+identity** — no dark mode — so the site looks the same in every guest's hand and
+matches the printed invitation. Mobile‑first and `prefers-reduced-motion` are honoured.
