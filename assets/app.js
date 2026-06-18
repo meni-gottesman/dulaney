@@ -60,21 +60,18 @@
       gate.addEventListener("click", function () { startAudio(); exitGate(); });
     } else {
       lockBackground(gate);
+      let clicked = false;
       const playFilm = function () {
         if (opened) return;
         const p = gateVideo.play();
-        if (p && p.catch) p.catch(function () {}); // muted autoplay may be blocked → tap/poster covers it
+        if (p && p.catch) p.catch(function () {});
       };
-      // drive the hint off the 'playing' event, not play()'s promise (which can reject spuriously)
+      // The film opens ONLY when tapped — the sealed-envelope poster + "Tap to open"
+      // hold until then. (No autoplay, no auto-skip; a guest opens it deliberately.)
       gateVideo.addEventListener("playing", function () { gate.classList.add("is-playing"); });
       gateVideo.addEventListener("ended", function () { exitGate(); });
-      gateVideo.addEventListener("error", function () { window.setTimeout(exitGate, 400); });
-      // a tap opens it too (covers browsers that block muted autoplay)
-      gate.addEventListener("click", function () { if (!opened) { startAudio(); playFilm(); } });
-      // attempt the auto-opening immediately
-      playFilm();
-      // safety net: never strand a guest if neither 'ended' nor a tap occurs
-      window.setTimeout(function () { if (!opened) exitGate(); }, 9000);
+      gateVideo.addEventListener("error", function () { if (clicked) window.setTimeout(exitGate, 400); });
+      gate.addEventListener("click", function () { if (!opened && !clicked) { clicked = true; startAudio(); playFilm(); } });
     }
   } else {
     // No gate on this page — show content immediately.
@@ -279,6 +276,33 @@
       hearts.classList.add("unlocked");
       if (cue) cue.style.opacity = "0";
       if (revealedLine) revealedLine.classList.add("revealed");
+      startCountdown(); // the date is uncovered now, so a countdown gives nothing away
+    }
+
+    function startCountdown() {
+      const cd = $("#countdown");
+      if (!cd || cd.dataset.started) return;
+      cd.dataset.started = "1";
+      // Ceremony: Saturday, 8 May 2027, 4:00 PM Atlantic Standard Time (UTC−04:00).
+      const target = new Date("2027-05-08T16:00:00-04:00").getTime();
+      const dEl = cd.querySelector('[data-cd="days"]');
+      const hEl = cd.querySelector('[data-cd="hours"]');
+      const mEl = cd.querySelector('[data-cd="mins"]');
+      const pad = function (n) { return String(n).padStart(2, "0"); };
+      let timer = null;
+      function tick() {
+        const diff = target - Date.now();
+        if (diff <= 0) {
+          cd.innerHTML = '<p class="savedate__line" style="margin:0">Today is the day. ✦</p>';
+          if (timer) clearInterval(timer);
+          return;
+        }
+        dEl.textContent = pad(Math.floor(diff / 86400000));
+        hEl.textContent = pad(Math.floor((diff % 86400000) / 3600000));
+        mEl.textContent = pad(Math.floor((diff % 3600000) / 60000));
+      }
+      tick();
+      timer = setInterval(tick, 30000); // calm, not a frantic per-second tick
     }
 
     function makeHeart(canvas) {
