@@ -21,45 +21,60 @@
     Array.from(body.children).forEach((el) => el.removeAttribute("inert"));
   }
 
-  /* ---------- ENVELOPE GATE (home page only) ---------- */
+  /* ---------- ENTRY GATE (home page only) — the opening film ----------
+     The couple's wax-sealed "J&M" envelope opens on film, then the gate
+     dissolves to hand the moment off to the hero name reveal. Muted, so it
+     auto-plays for "movement on open"; falls back to tap, and to a static
+     poster under reduced-motion. A guest is never stranded. */
   const gate = $("#gate");
-  const envelope = $("#envelope");
+  const gateVideo = $("#gateVideo");
   let opened = false;
 
-  if (gate && envelope) {
+  if (gate && gateVideo) {
     var exitGate = function (focusTarget) {
-      gate.classList.add("is-open");
-      body.classList.remove("is-sealed");
-      body.classList.add("entered"); // hand the moment off to the hero name reveal
-      opened = true;
-      unlockBackground();
-      try { sessionStorage.setItem("nevis_entered", "1"); } catch (e) {}
-      const t = focusTarget || $("#top"); // skip focus into the page content
-      if (t) t.focus({ preventScroll: true });
-    };
-    var openGate = function () {
       if (opened) return;
       opened = true;
-      envelope.classList.add("is-opening");
-      const gh = $("#gateHint"); if (gh) gh.style.opacity = "0";
-      startAudio(); // on this genuine user gesture (then they can mute)
-      const delay = prefersReduced ? 0 : 900;
-      window.setTimeout(() => exitGate(), delay);
+      gate.classList.add("is-open");
+      body.classList.remove("is-sealed");
+      body.classList.add("entered");
+      unlockBackground();
+      try { sessionStorage.setItem("nevis_entered", "1"); } catch (e) {}
+      try { gateVideo.pause(); } catch (e) {}
+      const t = focusTarget || $("#top");
+      if (t) t.focus({ preventScroll: true });
     };
-    const skipGate = function () { opened = false; exitGate(); };
-    envelope.addEventListener("click", openGate);
-    const gs = $("#gateSkip"); if (gs) gs.addEventListener("click", skipGate);
+
+    const gs = $("#gateSkip");
+    if (gs) gs.addEventListener("click", function () { startAudio(); exitGate(); });
 
     let returning = false;
     try { returning = sessionStorage.getItem("nevis_entered") === "1"; } catch (e) {}
+
     if (returning) {
-      gate.classList.add("is-instant", "is-open");
-      body.classList.remove("is-sealed");
-      body.classList.add("entered");
-      opened = true;
+      // seen the film already this visit → straight in, no replay
+      gate.classList.add("is-instant");
+      exitGate();
+    } else if (prefersReduced) {
+      // honour reduced motion: hold on the sealed poster, enter on tap/Enter
+      lockBackground(gate);
+      gate.addEventListener("click", function () { startAudio(); exitGate(); });
     } else {
       lockBackground(gate);
-      envelope.focus({ preventScroll: true });
+      const playFilm = function () {
+        if (opened) return;
+        const p = gateVideo.play();
+        if (p && p.catch) p.catch(function () {}); // muted autoplay may be blocked → tap/poster covers it
+      };
+      // drive the hint off the 'playing' event, not play()'s promise (which can reject spuriously)
+      gateVideo.addEventListener("playing", function () { gate.classList.add("is-playing"); });
+      gateVideo.addEventListener("ended", function () { exitGate(); });
+      gateVideo.addEventListener("error", function () { window.setTimeout(exitGate, 400); });
+      // a tap opens it too (covers browsers that block muted autoplay)
+      gate.addEventListener("click", function () { if (!opened) { startAudio(); playFilm(); } });
+      // attempt the auto-opening immediately
+      playFilm();
+      // safety net: never strand a guest if neither 'ended' nor a tap occurs
+      window.setTimeout(function () { if (!opened) exitGate(); }, 9000);
     }
   } else {
     // No gate on this page — show content immediately.

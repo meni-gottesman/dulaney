@@ -19,8 +19,11 @@ ivory/ink palette with a quiet **Caribbean‑blue** accent, Cormorant Garamond +
 quiet‑luxury editorial layout) with one restrained signature gesture from the
 reference site — the envelope opening:
 
-- ✉️ **Envelope opening** — a **full‑screen, fully opaque** dark takeover (nothing else
-  visible); the wax‑sealed envelope breaks open and dissolves to reveal the hero
+- ✉️ **Opening film** — a **full‑screen, fully opaque** takeover (nothing else visible):
+  the couple's own cream handmade‑paper envelope, sealed with a red **"J&M" wax heart**,
+  opens on a short muted **video** over an ivory field, then dissolves to the hero. It
+  auto‑plays for a hands‑free "movement on open," falls back to tap, and to a static
+  poster under reduced‑motion; a returning visitor skips straight in (per‑session)
 - 🎞️ **Cinematic hero** — a full‑bleed engagement photo, names anchored in the lower
   third, a slow ken‑burns and subtle scroll parallax for depth
 - 💛 **Scratch to reveal** — the Save‑the‑Date hides under a refined charcoal panel you
@@ -108,7 +111,8 @@ scenery. The set lives in `assets/`:
 | File | Source | Where it's used / why |
 |---|---|---|
 | `hero.jpg` / `hero-m.jpg` | 1645 | Full‑screen hero — the couple on the bow as a **dolphin surfaces** below them. The "wow": intimacy, a wild moment, and open water. Type sits in the lower third over that water; on phones (the QR target) the dolphin is in frame. |
-| `closing.jpg` | 1664 | The "We'll see you on the island" footer — the two of them facing the horizon. Cropped at 28% from top so the couple read against the sky. |
+| `closing.jpg` | 2366 | The "We'll see you on the island" farewell — the two of them at golden hour, her hand on his cheek, the boat's wake behind. A deliberately *different* register from the hero (sunset vs midday, a tender close‑up) so the first and last images never echo. Cropped at 36% from top. |
+| `opening.mp4` / `opening.webm` / `opening-poster.jpg` | Firefly clip | The entry‑gate film (above). 1080×1920, warm‑graded to ivory, trimmed to the sealed→open beat, muted. To restyle, re‑encode from the source in `~/Downloads` (see the note below the table). |
 | `g1 … g6` | 0420 · 0086 · 0942 · 0320 · 1932 · 0778 | Gallery, sequenced as an arc — *the place → tenderness → joy → golden romance → a still portrait → present, to camera* — with colour and black‑and‑white alternating. None repeat the hero/closing bow‑embrace. |
 
 All were resized/compressed for fast mobile loading (long edge 1500–2400px,

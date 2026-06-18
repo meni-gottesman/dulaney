@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Jaden &amp; McKenna Dulaney — Nevis, West Indies · May 2027</title>
+<title>The Dulaney Wedding — Nevis, West Indies · May 2027</title>
 <meta name="description" content="Jaden & McKenna Dulaney — bon voyage. A celebration at the Four Seasons, Nevis · May 6–10, 2027." />
 <meta name="theme-color" content="#f4efe4" />
 <meta name="color-scheme" content="light" />
@@ -30,24 +30,17 @@
 
 <body class="is-sealed">
 
-<!-- ====================== ENVELOPE GATE ====================== -->
-<div class="gate" id="gate" role="dialog" aria-modal="true" aria-label="Open your invitation">
-  <div class="gate__inner">
-    <p class="eyebrow gate__eyebrow">Bon Voyage</p>
-    <button class="envelope" id="envelope" aria-label="Open the invitation">
-      <span class="envelope__body"></span>
-      <span class="envelope__letter" aria-hidden="true">
-        <span class="m">Dulaney</span>
-        <span class="d">Nevis · May 2027</span>
-      </span>
-      <span class="envelope__pocket" aria-hidden="true"></span>
-      <span class="envelope__flap" aria-hidden="true"></span>
-      <span class="seal" aria-hidden="true">D</span>
-    </button>
-    <p class="gate__hint" id="gateHint">Tap to open</p>
-  </div>
+<!-- ====================== ENTRY GATE (the opening film) ====================== -->
+<!-- The couple's own wax-sealed "J&M" envelope opening; auto-plays, then
+     dissolves to the hero. Poster = the sealed first frame (no flash). -->
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-label="Your invitation">
+  <video class="gate__video" id="gateVideo" playsinline muted preload="auto"
+         poster="assets/opening-poster.jpg" aria-hidden="true">
+    <source src="assets/opening.webm" type="video/webm" />
+    <source src="assets/opening.mp4" type="video/mp4" />
+  </video>
+  <p class="gate__hint" id="gateHint">Tap to open</p>
   <button class="gate__skip" id="gateSkip">Enter</button>
-  <svg class="gate__grain" aria-hidden="true"><filter id="gng"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#gng)"/></svg>
 </div>
 
 <!-- ====================== AUDIO ====================== -->
@@ -76,14 +69,15 @@
     <button class="menu__close" id="menuClose">Close</button>
   </div>
   <div class="menu__nav">
-    <a href="index.html"><span class="idx">01</span>Home</a>
-    <a href="details.html#itinerary"><span class="idx">02</span>Itinerary</a>
-    <a href="details.html#travel"><span class="idx">03</span>Travel</a>
-    <a href="details.html#stay"><span class="idx">04</span>Stay</a>
-    <a href="details.html#dress"><span class="idx">05</span>Dress</a>
-    <a href="gallery.html"><span class="idx">06</span>Gallery</a>
-    <a href="details.html#registry"><span class="idx">07</span>Registry</a>
-    <a href="#rsvp"><span class="idx">08</span>RSVP</a>
+    <a href="#top"><span class="idx">01</span>Home</a>
+    <a href="details.html"><span class="idx">02</span>Details</a>
+    <a href="details.html#itinerary"><span class="idx sub">&mdash;</span>Itinerary</a>
+    <a href="details.html#travel"><span class="idx sub">&mdash;</span>Travel</a>
+    <a href="details.html#stay"><span class="idx sub">&mdash;</span>Stay</a>
+    <a href="details.html#dress"><span class="idx sub">&mdash;</span>Dress</a>
+    <a href="details.html#registry"><span class="idx sub">&mdash;</span>Registry</a>
+    <a href="gallery.html"><span class="idx">03</span>Gallery</a>
+    <a href="#rsvp"><span class="idx">04</span>RSVP</a>
   </div>
   <div class="menu__foot">
     <span>Four Seasons, Nevis</span>
@@ -120,7 +114,7 @@
     <div class="scratch reveal d1">
       <div class="scratch__under">
         <p class="savedate__date">Saturday, May 8</p>
-        <p class="savedate__where">The vows, at golden hour</p>
+        <p class="savedate__where">The vows, as the light turns gold</p>
       </div>
       <canvas class="scratch__cover" id="scratch" tabindex="0" role="button"
               aria-label="Scratch to reveal the day — or press Enter to reveal: Saturday, May 8, 2027 — the ceremony"></canvas>
@@ -198,7 +192,7 @@
     <div class="rsvp__thanks" id="rsvpThanks" role="status" aria-live="polite">
       <p class="eyebrow" id="thanksEyebrow">Received with love</p>
       <p class="display" id="thanksName">Thank you</p>
-      <p style="color:var(--charcoal); margin-top:0.8rem" id="thanksMsg">We can’t wait to celebrate with you on the island.</p>
+      <p style="color:var(--charcoal); margin-top:0.8rem" id="thanksMsg">We can’t wait to celebrate with you in Nevis.</p>
     </div>
   </div>
 </section>
@@ -216,7 +210,7 @@
     <p class="closing__meta">Four Seasons, Nevis · West Indies · MMXXVII</p>
   </div>
 </footer>
-<p class="colophon">Jaden &amp; McKenna Dulaney · Nevis · May 2027</p>
+<p class="colophon">With love · Jaden &amp; McKenna</p>
 
 <script src="assets/app.js"></script>
 </body>
