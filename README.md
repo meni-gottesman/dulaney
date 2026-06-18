@@ -35,9 +35,19 @@ reference site — the envelope opening:
 The palette is locked to a single light identity (no surprise dark mode), so the site
 looks the same in every guest's hand and matches the printed invitation.
 
-Everything is in a **single, self‑contained `index.html`** — no build step, no
-dependencies (only Google Fonts over the network). Double‑click to open, or host it
-anywhere static (Netlify, Vercel, GitHub Pages, S3, …).
+### Structure — three pages, shared styling
+A minimal home, with the details on their own pages (no build step; only Google Fonts
+over the network):
+
+| File | What's on it |
+|---|---|
+| `index.html` | **Home** — envelope gate → hero → Save‑the‑Date (scratch) → RSVP → closing |
+| `details.html` | Itinerary · Travel · Stay · Dress code · Registry |
+| `gallery.html` | Engagement photos + lightbox |
+| `assets/style.css` | All styling (shared by every page) |
+| `assets/app.js` | All behaviour (gate, scratch, lightbox, RSVP… each guarded so it no‑ops where absent) |
+
+Edit text directly in the page's HTML; edit look‑and‑feel once in `assets/style.css`.
 
 ---
 
