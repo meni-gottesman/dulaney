@@ -396,49 +396,258 @@
     });
   })();
 
-  /* ---------- RSVP ---------- */
-  const form = $("#rsvpForm");
-  if (form) {
+  /* ---------- RSVP — form · public guest list · hosts admin ----------
+     Data lives in a Google Sheet via an Apps Script web app (see RSVP_ENDPOINT).
+     With no endpoint set it runs in LOCAL DEMO mode (this browser only) so the
+     flow can be shown before the couple connects their Sheet. The admin password
+     is verified SERVER-SIDE by the Apps Script in live mode. */
+  (function rsvp() {
+    const form = $("#rsvpForm");
+    if (!form) return;
+
+    // ===== CONFIG — set these to go live ===================================
+    // Paste the Apps Script web-app URL (…/exec). Empty = local demo mode.
+    const RSVP_ENDPOINT = "";
+    // Demo-only password (local mode). In live mode the REAL password lives in
+    // the Apps Script, NOT here — this value is ignored when an endpoint is set.
+    const DEMO_ADMIN_PASSWORD = "dulaney2027";
+    // =======================================================================
+    const LIVE = !!RSVP_ENDPOINT;
+    if (!LIVE) console.warn("[RSVP] Demo mode (saves to this browser only). Set RSVP_ENDPOINT in assets/app.js — see README §6 — to collect replies in your Google Sheet.");
+
+    /* ----- data layer (swaps between the Sheet API and local demo) ----- */
+    function gas(payload) {
+      return fetch(RSVP_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" }, // simple req → no CORS preflight
+        body: JSON.stringify(payload),
+        redirect: "follow",
+      }).then((r) => r.json());
+    }
+    const LS_KEY = "nevis_rsvps_v2";
+    const lsAll = () => { try { return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); } catch (e) { return []; } };
+    const lsSave = (a) => { try { localStorage.setItem(LS_KEY, JSON.stringify(a)); } catch (e) {} };
+    const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    const pub = (r) => ({ name: r.name, party: r.party, companions: r.companions || [] });
+    const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+    const api = {
+      submit(rec) {
+        if (LIVE) return gas({ action: "submit", record: rec });
+        const all = lsAll();
+        const i = all.findIndex((r) => (r.email || "").toLowerCase() === rec.email.toLowerCase());
+        const saved = Object.assign({ id: i >= 0 ? all[i].id : uid() }, rec, { updated: new Date().toISOString() });
+        if (i >= 0) all[i] = saved; else all.push(saved);
+        lsSave(all);
+        return Promise.resolve({ ok: true, record: saved });
+      },
+      listPublic() {
+        if (LIVE) return gas({ action: "list" }).then((r) => r.guests || []);
+        return Promise.resolve(lsAll().filter((r) => r.attending === "yes").map(pub));
+      },
+      adminAuth(pw) {
+        if (LIVE) return gas({ action: "admin", password: pw });
+        return Promise.resolve(pw === DEMO_ADMIN_PASSWORD ? { ok: true, guests: lsAll() } : { ok: false });
+      },
+      adminUpdate(pw, id, fields) {
+        if (LIVE) return gas({ action: "update", password: pw, id: id, fields: fields });
+        const all = lsAll(); const r = all.find((x) => x.id === id);
+        if (r) { Object.assign(r, fields); lsSave(all); }
+        return Promise.resolve({ ok: true, guests: all });
+      },
+      adminRemove(pw, id) {
+        if (LIVE) return gas({ action: "remove", password: pw, id: id });
+        const all = lsAll().filter((x) => x.id !== id); lsSave(all);
+        return Promise.resolve({ ok: true, guests: all });
+      },
+    };
+
+    /* ----- companions (who's coming with you) ----- */
+    const companionsWrap = $("#companions");
+    function addCompanion(value) {
+      const row = document.createElement("div");
+      row.className = "companion";
+      row.innerHTML = '<input type="text" class="companion__name" placeholder="Guest name" autocomplete="off" />' +
+        '<button type="button" class="companion__remove" aria-label="Remove guest">×</button>';
+      row.querySelector(".companion__name").value = value || "";
+      row.querySelector(".companion__remove").addEventListener("click", () => row.remove());
+      companionsWrap.appendChild(row);
+      return row;
+    }
+    const getCompanions = () => $$(".companion__name", companionsWrap).map((i) => i.value.trim()).filter(Boolean);
+    const setCompanions = (arr) => { companionsWrap.innerHTML = ""; (arr || []).forEach((n) => addCompanion(n)); };
+    const addBtn = $("#addCompanion");
+    if (addBtn) addBtn.addEventListener("click", () => addCompanion().querySelector("input").focus());
+
+    /* ----- attending toggle ----- */
     const ifYes = $("#ifYes");
-    form.addEventListener("change", (e) => {
-      if (e.target.name === "attending") {
-        const yes = form.querySelector('[name="attending"]:checked')?.value === "yes";
-        ifYes.classList.toggle("collapsed", !yes);
-      }
-    });
+    function syncIfYes() {
+      const yes = (form.querySelector('[name="attending"]:checked') || {}).value === "yes";
+      ifYes.classList.toggle("collapsed", !yes);
+    }
+    form.addEventListener("change", (e) => { if (e.target.name === "attending") syncIfYes(); });
+    syncIfYes();
+
+    /* ----- submit ----- */
+    const statusEl = $("#rsvpStatus");
+    const thanks = $("#rsvpThanks");
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       if (!form.reportValidity()) return;
-      const data = Object.fromEntries(new FormData(form).entries());
-      submitRSVP(data);
+      const attending = (form.querySelector('[name="attending"]:checked') || {}).value || "no";
+      const companions = attending === "yes" ? getCompanions() : [];
+      const rec = {
+        name: $("#guestName").value.trim(),
+        email: $("#guestEmail").value.trim(),
+        attending: attending,
+        companions: companions,
+        party: attending === "yes" ? 1 + companions.length : 0,
+        note: ($("#note").value || "").trim(),
+      };
+      const btn = $("#rsvpSubmit");
+      btn.disabled = true; statusEl.textContent = "Sending…";
+      api.submit(rec).then(() => {
+        try { localStorage.setItem("nevis_my_rsvp", JSON.stringify(rec)); } catch (x) {}
+        statusEl.textContent = "";
+        showThanks(rec);
+        loadGuestList();
+      }).catch(() => { statusEl.textContent = "Hmm — that didn’t send. Please try again."; })
+        .then(() => { btn.disabled = false; });
     });
-  }
 
-  function submitRSVP(data) {
-    // --- INTEGRATION HOOK ---------------------------------------------------
-    // This stores the reply locally and shows a confirmation. To wire a real
-    // backend, POST `data` to your endpoint (or the couple's Lovable/Supabase
-    // function) here, then resolve the confirmation on success.
-    try {
-      const all = JSON.parse(localStorage.getItem("nevis_rsvps") || "[]");
-      all.push({ ...data, at: new Date().toISOString() });
-      localStorage.setItem("nevis_rsvps", JSON.stringify(all));
-    } catch (e) {}
+    function showThanks(rec) {
+      const attending = rec.attending === "yes";
+      const first = rec.name ? rec.name.split(" ")[0] : "";
+      $("#thanksEyebrow").textContent = attending ? "Received with love" : "Thank you for letting us know";
+      $("#thanksName").textContent = attending
+        ? (first ? "See you on the island, " + first + "." : "See you on the island.")
+        : (first ? "Thank you, " + first + "." : "Thank you.");
+      $("#thanksMsg").textContent = attending
+        ? (rec.party > 1 ? "Your party of " + rec.party + " is on the list. Details to follow." : "Your reply is received with love. Details to follow.")
+        : "We’ll miss you — but we’re so grateful you let us know.";
+      form.style.display = "none";
+      thanks.classList.add("show");
+      thanks.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "center" });
+    }
 
-    const form = $("#rsvpForm");
-    const thanks = $("#rsvpThanks");
-    const attending = data.attending === "yes";
-    $("#thanksEyebrow").textContent = attending ? "Received with love" : "Thank you for letting us know";
-    $("#thanksName").textContent = data.guestName
-      ? (attending ? `See you on the island, ${data.guestName.split(" ")[0]}.` : `Thank you, ${data.guestName.split(" ")[0]}.`)
-      : (attending ? "See you on the island." : "Thank you.");
-    $("#thanksMsg").textContent = attending
-      ? "Your reply is received with love. Details to follow as the day draws near."
-      : "We'll miss you — but we're so grateful you let us know.";
-    form.style.display = "none";
-    thanks.classList.add("show");
-    thanks.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "center" });
-  }
+    /* ----- change my reply (this device) ----- */
+    const editAgain = $("#rsvpEditAgain");
+    if (editAgain) editAgain.addEventListener("click", () => {
+      thanks.classList.remove("show");
+      form.style.display = "";
+      try {
+        const mine = JSON.parse(localStorage.getItem("nevis_my_rsvp") || "null");
+        if (mine) {
+          $("#guestName").value = mine.name || "";
+          $("#guestEmail").value = mine.email || "";
+          const r = form.querySelector('[name="attending"][value="' + mine.attending + '"]'); if (r) r.checked = true;
+          $("#note").value = mine.note || "";
+          setCompanions(mine.companions);
+          syncIfYes();
+        }
+      } catch (x) {}
+      form.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "center" });
+    });
+
+    /* ----- public guest list ----- */
+    const glItems = $("#guestlistItems");
+    const glCount = $("#guestlistCount");
+    const glEmpty = $("#guestlistEmpty");
+    function loadGuestList() {
+      api.listPublic().then((guests) => {
+        glItems.innerHTML = "";
+        if (!guests.length) { glCount.innerHTML = "&nbsp;"; glEmpty.hidden = false; return; }
+        glEmpty.hidden = true;
+        const total = guests.reduce((s, g) => s + (Number(g.party) || 1), 0);
+        glCount.textContent = total + (total === 1 ? " coming, so far" : " coming, so far");
+        guests.forEach((g) => {
+          const li = document.createElement("li");
+          li.className = "guestlist__item";
+          const withText = (g.companions && g.companions.length) ? "with " + g.companions.join(", ") : "";
+          const partyText = g.party > 1 ? "party of " + g.party : "";
+          const meta = [partyText, withText].filter(Boolean).join(" · ");
+          li.innerHTML = '<span class="g-name">' + esc(g.name) + "</span>" + (meta ? '<span class="g-meta">' + esc(meta) + "</span>" : "");
+          glItems.appendChild(li);
+        });
+      }).catch(() => {});
+    }
+    loadGuestList();
+
+    /* ----- hosts admin (password-gated) ----- */
+    const admin = $("#admin");
+    if (admin) {
+      const adminGate = $("#adminGate");
+      const adminPanel = $("#adminPanel");
+      const adminErr = $("#adminError");
+      const adminList = $("#adminList");
+      const adminSummary = $("#adminSummary");
+      let adminPw = "", adminGuests = [];
+
+      const openAdmin = () => { admin.hidden = false; body.classList.add("menu-open"); $("#adminPw").focus(); };
+      const closeAdmin = () => { admin.hidden = true; body.classList.remove("menu-open"); if (location.hash === "#admin") history.replaceState(null, "", location.pathname + location.search); };
+      const hostsLink = $("#hostsLink"); if (hostsLink) hostsLink.addEventListener("click", (e) => { e.preventDefault(); openAdmin(); });
+      const adminCloseBtn = $("#adminClose"); if (adminCloseBtn) adminCloseBtn.addEventListener("click", closeAdmin);
+      if (location.hash === "#admin") openAdmin();
+
+      adminGate.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const pw = $("#adminPw").value;
+        adminErr.textContent = "Checking…";
+        api.adminAuth(pw).then((res) => {
+          if (res && res.ok) {
+            adminPw = pw; adminGuests = res.guests || [];
+            adminGate.hidden = true; adminPanel.hidden = false; adminErr.textContent = "";
+            renderAdmin();
+          } else { adminErr.textContent = "That password didn’t match."; }
+        }).catch(() => { adminErr.textContent = "Couldn’t reach the guest list. Please try again."; });
+      });
+
+      function renderAdmin() {
+        const yes = adminGuests.filter((g) => g.attending === "yes");
+        const heads = yes.reduce((s, g) => s + (Number(g.party) || 1), 0);
+        adminSummary.textContent = adminGuests.length + (adminGuests.length === 1 ? " reply" : " replies") + " · " +
+          yes.length + " coming (" + heads + (heads === 1 ? " guest" : " guests") + ") · " +
+          adminGuests.filter((g) => g.attending === "no").length + " declined";
+        adminList.innerHTML = "";
+        adminGuests.slice().sort((a, b) => (b.updated || "").localeCompare(a.updated || "")).forEach((g) => {
+          const row = document.createElement("div");
+          row.className = "admin-row";
+          const party = g.attending === "yes" ? "party of " + (g.party || 1) + ((g.companions && g.companions.length) ? ": " + esc(g.companions.join(", ")) : "") : "";
+          row.innerHTML =
+            '<div class="admin-row__main"><span class="admin-row__name">' + esc(g.name) + '</span>' +
+            '<span class="admin-row__email">' + esc(g.email) + '</span></div>' +
+            '<div class="admin-row__meta"><span class="tag ' + (g.attending === "yes" ? "tag--yes" : "tag--no") + '">' + (g.attending === "yes" ? "Coming" : "Declined") + '</span>' +
+            (party ? '<span class="admin-row__party">' + party + '</span>' : "") +
+            (g.note ? '<span class="admin-row__note">“' + esc(g.note) + '”</span>' : "") + '</div>' +
+            '<div class="admin-row__actions"><button type="button" class="link-btn" data-toggle="' + g.id + '">' + (g.attending === "yes" ? "Mark declined" : "Mark coming") + '</button>' +
+            '<button type="button" class="link-btn link-btn--danger" data-remove="' + g.id + '">Remove</button></div>';
+          adminList.appendChild(row);
+        });
+        $$("[data-toggle]", adminList).forEach((b) => b.addEventListener("click", () => {
+          const id = b.getAttribute("data-toggle"), g = adminGuests.find((x) => x.id === id);
+          const next = g.attending === "yes" ? "no" : "yes";
+          api.adminUpdate(adminPw, id, { attending: next, party: next === "yes" ? (g.party || 1) : 0 }).then((res) => { adminGuests = res.guests || adminGuests; renderAdmin(); loadGuestList(); });
+        }));
+        $$("[data-remove]", adminList).forEach((b) => b.addEventListener("click", () => {
+          const id = b.getAttribute("data-remove"), g = adminGuests.find((x) => x.id === id);
+          if (!window.confirm("Remove " + (g ? g.name : "this guest") + " from the list?")) return;
+          api.adminRemove(adminPw, id).then((res) => { adminGuests = res.guests || adminGuests; renderAdmin(); loadGuestList(); });
+        }));
+      }
+
+      const csvBtn = $("#downloadCsv");
+      const csvCell = (v) => { v = String(v == null ? "" : v); return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+      if (csvBtn) csvBtn.addEventListener("click", () => {
+        const rows = [["Name", "Email", "Attending", "Party", "Companions", "Note", "Updated"]];
+        adminGuests.forEach((g) => rows.push([g.name, g.email, g.attending, g.party || "", (g.companions || []).join("; "), g.note || "", g.updated || ""]));
+        const csv = rows.map((r) => r.map(csvCell).join(",")).join("\r\n");
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+        a.download = "dulaney-rsvps.csv";
+        document.body.appendChild(a); a.click(); a.remove();
+      });
+    }
+  })();
 
   /* ---------- GALLERY: fade images in on load + lightbox ---------- */
   const galleryImgs = $$(".gallery-grid .duo");

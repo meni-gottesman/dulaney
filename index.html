@@ -159,12 +159,12 @@
     <form class="form reveal d1" id="rsvpForm" novalidate>
       <div class="grid-2">
         <div class="field">
-          <label for="guestName">Your Name</label>
-          <input type="text" id="guestName" name="guestName" autocomplete="name" required />
+          <label for="guestName">Your name</label>
+          <input type="text" id="guestName" name="name" autocomplete="name" required />
         </div>
         <div class="field">
           <label for="guestEmail">Email</label>
-          <input type="email" id="guestEmail" name="guestEmail" autocomplete="email" required />
+          <input type="email" id="guestEmail" name="email" autocomplete="email" required />
         </div>
       </div>
 
@@ -178,34 +178,36 @@
         </fieldset>
       </div>
 
-      <div class="grid-2" id="ifYes">
+      <div id="ifYes">
         <div class="field">
-          <label for="guests">Number in your party</label>
-          <input type="number" id="guests" name="guests" min="1" max="10" value="1" inputmode="numeric" />
+          <label>Who’s joining you?</label>
+          <p class="field__hint">Add anyone coming with you. Leave empty if it’s just you.</p>
+          <div class="companions" id="companions"></div>
+          <button type="button" class="link-btn" id="addCompanion">+ Add a guest</button>
         </div>
         <div class="field">
-          <label for="meal">Dinner preference</label>
-          <select id="meal" name="meal">
-            <option value="Land">Land</option>
-            <option value="Sea">Sea</option>
-            <option value="Garden">Garden</option>
-            <option value="Chef's Choice">Chef’s Choice</option>
-          </select>
+          <label for="note">A note, or a song that should play</label>
+          <textarea id="note" name="note" placeholder="Anything you’d like us to know…"></textarea>
         </div>
       </div>
 
-      <div class="field">
-        <label for="note">A note, or a song that should play</label>
-        <textarea id="note" name="note" placeholder="Anything you'd like us to know…"></textarea>
-      </div>
-
-      <button type="submit" class="btn">Reply</button>
+      <button type="submit" class="btn" id="rsvpSubmit">Send reply</button>
+      <p class="form__status" id="rsvpStatus" role="status" aria-live="polite"></p>
     </form>
 
     <div class="rsvp__thanks" id="rsvpThanks" role="status" aria-live="polite">
       <p class="eyebrow" id="thanksEyebrow">Received with love</p>
       <p class="display" id="thanksName">Thank you</p>
       <p style="color:var(--charcoal); margin-top:0.8rem" id="thanksMsg">We can’t wait to celebrate with you in Nevis.</p>
+      <button type="button" class="link-btn" id="rsvpEditAgain">Change my reply</button>
+    </div>
+
+    <!-- Public guest list — who has said they're coming -->
+    <div class="guestlist reveal" id="guestlist" aria-live="polite">
+      <p class="eyebrow" style="text-align:center">On the island</p>
+      <p class="guestlist__count display" id="guestlistCount">&nbsp;</p>
+      <ul class="guestlist__items" id="guestlistItems"></ul>
+      <p class="guestlist__empty" id="guestlistEmpty" hidden>Be the first to say you’ll be there.</p>
     </div>
   </div>
 </section>
@@ -223,7 +225,36 @@
     <p class="closing__meta">Four Seasons, Nevis · West Indies · MMXXVII</p>
   </div>
 </footer>
-<p class="colophon">With love · Jaden &amp; McKenna</p>
+<p class="colophon">With love · Jaden &amp; McKenna <a href="#admin" class="hosts-link" id="hostsLink">Hosts</a></p>
+
+<!-- ====================== HOSTS ADMIN (password-gated) ======================
+     Opens on the "Hosts" link or the #admin URL. The password is checked
+     SERVER-SIDE by the Apps Script; the couple can edit/remove entries and
+     download a CSV. (In demo mode it runs locally with a demo password.) -->
+<section class="admin" id="admin" aria-label="Hosts admin" hidden>
+  <div class="admin__inner">
+    <button class="admin__close" id="adminClose" aria-label="Close">Close</button>
+    <p class="eyebrow">Hosts only</p>
+    <h2 class="display admin__title">The guest list</h2>
+
+    <form class="admin__gate" id="adminGate">
+      <div class="field">
+        <label for="adminPw">Password</label>
+        <input type="password" id="adminPw" autocomplete="current-password" />
+      </div>
+      <button class="btn" type="submit" id="adminEnter">Enter</button>
+      <p class="form__status" id="adminError"></p>
+    </form>
+
+    <div class="admin__panel" id="adminPanel" hidden>
+      <div class="admin__bar">
+        <p class="admin__summary" id="adminSummary">&nbsp;</p>
+        <button class="btn btn--ghost" type="button" id="downloadCsv">Download CSV</button>
+      </div>
+      <div class="admin__list" id="adminList"></div>
+    </div>
+  </div>
+</section>
 
 <script src="assets/app.js"></script>
 </body>
