@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Gallery — The Dulaney Wedding · Nevis, May 2027</title>
+<meta name="description" content="Engagement photography — Jaden & McKenna Dulaney." />
+<meta name="theme-color" content="#f4efe4" />
+<meta name="color-scheme" content="light" />
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23262114'/><text x='16' y='23' font-family='Georgia,serif' font-size='17' fill='%23f4efe4' text-anchor='middle'>D</text></svg>" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="assets/style.css" />
+</head>
+
+<body>
+
+<!-- ====================== HEADER ====================== -->
+<header class="site-header scrolled" id="header">
+  <a class="brand" href="index.html">Dulaney</a>
+  <div class="site-header__right">
+    <a class="header-rsvp" href="index.html#rsvp">RSVP</a>
+    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="menu">
+      Menu <span class="lines" aria-hidden="true"></span>
+    </button>
+  </div>
+</header>
+
+<!-- ====================== MENU OVERLAY ====================== -->
+<nav class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Primary">
+  <div class="menu__top">
+    <span class="brand">Dulaney</span>
+    <button class="menu__close" id="menuClose">Close</button>
+  </div>
+  <div class="menu__nav">
+    <a href="index.html"><span class="idx">01</span>Home</a>
+    <a href="details.html#travel"><span class="idx">02</span>Travel</a>
+    <a href="details.html#stay"><span class="idx">03</span>Stay</a>
+    <a href="details.html#itinerary"><span class="idx">04</span>Itinerary</a>
+    <a href="details.html#dress"><span class="idx">05</span>Dress</a>
+    <a href="gallery.html"><span class="idx">06</span>Gallery</a>
+    <a href="details.html#registry"><span class="idx">07</span>Registry</a>
+    <a href="index.html#rsvp"><span class="idx">08</span>RSVP</a>
+  </div>
+  <div class="menu__foot">
+    <span>Four Seasons, Nevis</span>
+    <span>May 6&ndash;10, 2027</span>
+  </div>
+</nav>
+
+<main id="top" tabindex="-1">
+
+<header class="pagehead">
+  <p class="eyebrow reveal">Gallery</p>
+  <h1 class="display pagehead__title reveal d1">Us, lately</h1>
+</header>
+
+<!-- ====================== GALLERY ====================== -->
+<section class="section" id="gallery" style="padding-top:0">
+  <div class="wrap">
+    <!-- Engagement photos. To change the set, swap the files in assets/ (g1–g8). -->
+    <div class="gallery-grid" role="group" aria-label="Engagement photos — tap any to enlarge">
+      <figure class="tile reveal" tabindex="0" role="button" aria-label="Enlarge photo"><img class="duo" src="assets/g8.jpg" width="2000" height="1498" alt="The two of them out on the open water" loading="lazy" decoding="async" /></figure>
+      <figure class="tile reveal" tabindex="0" role="button" aria-label="Enlarge photo"><img class="duo" src="assets/g2.jpg" width="1067" height="1600" alt="Jaden and McKenna, an embrace" loading="lazy" decoding="async" /></figure>
+      <figure class="tile reveal" tabindex="0" role="button" aria-label="Enlarge photo"><img class="duo" src="assets/g3.jpg" width="1067" height="1600" alt="McKenna in golden light" loading="lazy" decoding="async" /></figure>
+      <figure class="tile reveal" tabindex="0" role="button" aria-label="Enlarge photo"><img class="duo" src="assets/g1.jpg" width="2000" height="1498" alt="Their yacht seen from above" loading="lazy" decoding="async" /></figure>
+      <figure class="tile reveal" tabindex="0" role="button" aria-label="Enlarge photo"><img class="duo" src="assets/g4.jpg" width="1067" height="1600" alt="A quiet moment on deck" loading="lazy" decoding="async" /></figure>
+      <figure class="tile reveal" tabindex="0" role="button" aria-label="Enlarge photo"><img class="duo" src="assets/g5.jpg" width="1067" height="1600" alt="Close together, in black and white" loading="lazy" decoding="async" /></figure>
+      <figure class="tile reveal" tabindex="0" role="button" aria-label="Enlarge photo"><img class="duo" src="assets/g7.jpg" width="1065" height="1600" alt="Laughing by the water" loading="lazy" decoding="async" /></figure>
+      <figure class="tile reveal" tabindex="0" role="button" aria-label="Enlarge photo"><img class="duo" src="assets/g6.jpg" width="1067" height="1600" alt="The two of them, in monochrome" loading="lazy" decoding="async" /></figure>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="pagefoot">
+  <p class="pagefoot__mono">Dulaney</p>
+  <nav class="pagefoot__nav" aria-label="Footer">
+    <a href="index.html">Home</a>
+    <a href="details.html">Details</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="index.html#rsvp">RSVP</a>
+  </nav>
+  <p class="pagefoot__meta">Four Seasons, Nevis · May 6&ndash;10, 2027</p>
+</footer>
+
+<!-- ====================== LIGHTBOX ====================== -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <button class="lightbox__close" id="lightboxClose">Close</button>
+  <button class="lightbox__nav lightbox__prev" id="lightboxPrev" aria-label="Previous photo">‹</button>
+  <img class="lightbox__img" id="lightboxImg" alt="" />
+  <button class="lightbox__nav lightbox__next" id="lightboxNext" aria-label="Next photo">›</button>
+  <span class="lightbox__count" id="lightboxCount" aria-hidden="true"></span>
+</div>
+
+<script src="assets/app.js"></script>
+</body>
+</html>
