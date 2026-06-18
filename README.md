@@ -19,20 +19,21 @@ ivory/ink palette with a quiet **Caribbean‑blue** accent, Cormorant Garamond +
 quiet‑luxury editorial layout) with one restrained signature gesture from the
 reference site — the envelope opening:
 
-- ✉️ **Opening film** — a **full‑screen, fully opaque** takeover (nothing else visible):
-  the couple's own cream handmade‑paper envelope, sealed with a red **"J&M" wax heart**,
-  opens on a short muted **video** over an ivory field, then dissolves to the hero. It
-  auto‑plays for a hands‑free "movement on open," falls back to tap, and to a static
-  poster under reduced‑motion; a returning visitor skips straight in (per‑session)
+- ✉️ **Opening film** — a **full‑screen** takeover: an extreme close‑up of the couple's
+  cream handmade‑paper envelope, sealed with a red **"J&M" wax heart**. It **plays only
+  when tapped** (a sealed‑envelope poster + "Tap to open" until then); the envelope opens,
+  warm light blooms from inside, and the frame **whites out** — then the **site fades in
+  from white**. On phones the film is zoomed into the seal (`object-fit: cover`). A
+  returning visitor skips straight in (per‑session); reduced‑motion holds on the poster.
 - 🎞️ **Cinematic hero** — a full‑bleed engagement photo, names anchored in the lower
   third, a slow ken‑burns and subtle scroll parallax for depth
-- 💛 **Scratch to reveal** — the Save‑the‑Date hides under a refined charcoal panel you
-  scratch (or press Enter) to reveal the dates
+- 💛 **Three hearts, scratch to reveal** — the Save‑the‑Date hides Day · Month · Year
+  under three wax‑heart scratch‑offs (or press Enter); all three open a live **countdown**
 - 🖼️ **Engagement gallery** — an editorial masonry with a tap‑to‑enlarge **lightbox**
   (swipe / arrows / keyboard)
-- ⏳ **Countdown** to the day (days · hours · minutes)
-- 🔊 **Ambient sound** — **off by default**, opt‑in via the control bottom‑right (a
-  quiet ring hints at it on entry); choice remembered across visits
+- 🔊 **Ambient music** — the track `assets/ambient.mp3` begins gently on the open‑envelope
+  tap (a real user gesture), loops, and can be muted any time via the control bottom‑right;
+  a guest's choice is remembered across visits
 - 📜 Scroll reveals, editorial **itinerary**, full **RSVP**
 
 The palette is locked to a single light identity (no surprise dark mode), so the site
@@ -130,18 +131,15 @@ remain untouched in your `Dulaney Engagement.zip`.
 - **Re-optimize new images** with the macOS built-in (no installs):
   `sips -Z 1800 big-photo.jpg --out assets/gX.jpg` (then they're web-ready).
 
-### 4. Ambient music (instead of the generated pad)
-Drop an MP3 in `assets/` and uncomment the source in the `<audio id="audioEl">` tag:
-```html
-<audio id="audioEl" loop preload="none">
-  <source src="assets/ambient.mp3" type="audio/mpeg" />
-</audio>
-```
-The site automatically prefers a real track over the synthesized pad. **Sound is off
-by default** (consent‑first, since the site is reached by surprise QR scan) — a quiet
-ring around the control bottom‑right hints at it on entry, and a guest's choice is
-remembered across visits. To greet guests with music instead, change the default in
-`startAudio()` from `"off"` back to `"on"`.
+### 4. Ambient music
+The track **`assets/ambient.mp3`** (Elijah K — *Ocean Daydreams*, re‑encoded to 128 kbps
+mono‑friendly MP3, looping) is wired into the `<audio id="audioEl">` tag and **begins
+gently when a guest taps the envelope to open it** (a real tap is required by browsers to
+start sound). It fades in, loops, and the control bottom‑right mutes/unmutes it; the choice
+is remembered across visits. To swap the song, replace `assets/ambient.mp3`. To make it
+**off by default** instead, change `let pref = "on"` back to `"off"` in `startAudio()`
+(`assets/app.js`). If no `<source>` is present, the site falls back to a soft synthesized
+pad.
 
 ### 5. Registry links — still placeholders ⚠️
 The invitation didn't include registry info, so the two **Registry** links point at
