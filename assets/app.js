@@ -85,7 +85,7 @@
   const audioToggle = $("#audioToggle");
   const audioEl = $("#audioEl");
   const hasRealTrack = audioEl && audioEl.querySelector("source");
-  let audioCtx, master, started = false, isOn = false, lfoTimers = [];
+  let audioCtx, master, started = false, isOn = false, lfoTimers = [], realFadeTimer = null;
 
   function buildPad() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -137,31 +137,42 @@
   }
 
   function startAudio() {
-    // Consent-first: sound is OFF by default and never begins from the gate gesture.
-    // It plays only if the guest previously chose it on (persisted in localStorage).
-    let pref = "off";
-    try { pref = localStorage.getItem("nevis_audio") || "off"; } catch (e) {}
+    // The ambient track begins on the tap-to-open gesture (a valid user gesture),
+    // unless the guest muted it on a previous visit. They can mute any time.
+    let pref = "on";
+    try { pref = localStorage.getItem("nevis_audio") || "on"; } catch (e) {}
     if (pref !== "on") { setAudioUI(false); return; }
     enableAudio();
   }
 
+  const PEAK = 0.42; // gentle — ambient, never loud
   function enableAudio() {
     if (hasRealTrack) {
-      audioEl.volume = 0.4;
+      if (realFadeTimer) clearInterval(realFadeTimer);
+      audioEl.volume = 0;
       const p = audioEl.play();
       if (p && p.catch) p.catch(() => {});
+      realFadeTimer = setInterval(() => { // ~2s fade-in
+        audioEl.volume = Math.min(PEAK, audioEl.volume + 0.025);
+        if (audioEl.volume >= PEAK) { clearInterval(realFadeTimer); realFadeTimer = null; }
+      }, 110);
     } else {
       if (!started) { try { buildPad(); started = true; } catch (e) { return; } }
       if (audioCtx.state === "suspended") audioCtx.resume();
-      fade(0.5, 4); // gentle — ambient, never loud
+      fade(0.5, 4);
     }
     isOn = true; setAudioUI(true);
     try { localStorage.setItem("nevis_audio", "on"); } catch (e) {}
   }
 
   function disableAudio() {
-    if (hasRealTrack) { audioEl.pause(); }
-    else if (master) { fade(0.0001, 0.6); }
+    if (hasRealTrack) {
+      if (realFadeTimer) clearInterval(realFadeTimer);
+      realFadeTimer = setInterval(() => { // quick fade-out, then pause
+        audioEl.volume = Math.max(0, audioEl.volume - 0.04);
+        if (audioEl.volume <= 0) { clearInterval(realFadeTimer); realFadeTimer = null; audioEl.pause(); }
+      }, 70);
+    } else if (master) { fade(0.0001, 0.6); }
     isOn = false; setAudioUI(false);
     try { localStorage.setItem("nevis_audio", "off"); } catch (e) {}
   }
