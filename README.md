@@ -148,12 +148,29 @@ The invitation didn't include registry info, so the two **Registry** links point
 `#registry` (a harmless no‑op). Replace them with real URLs when ready, or remove the
 section. (Marked `SWAP:` in the code.)
 
-### 6. RSVP backend (currently client‑side)
-RSVPs are stored in the browser's `localStorage` and a confirmation is shown. To
-collect them for real, edit `submitRSVP(data)` (marked `--- INTEGRATION HOOK ---`)
-to `POST` `data` to your endpoint — e.g. a Google Form/Sheet, Formspree, or your
-existing Lovable/Supabase function. The `data` object contains:
-`guestName, guestEmail, attending, guests, meal, note`.
+### 6. RSVP — guest list + Hosts admin (Google Sheet backend)
+The RSVP lets guests reply, **say who's coming with them**, and see a public
+*"who's coming"* list. The couple get a **password‑protected Hosts panel** (the
+**Hosts** link in the footer, or `…/#admin`) to edit/remove anyone and **download a
+CSV** — and the data lives in a plain **Google Sheet they own** (the simplest thing
+to manage). The admin password is checked **on Google's servers**, so it's never
+exposed in the page.
+
+**Out of the box it runs in DEMO mode** (saves to that one browser, demo password
+`dulaney2027`) so you can show the couple the whole flow. To make it **live & shared**:
+
+1. Create a Google Sheet (visit `sheets.new`) — this is the guest list. Rename tab 1 to **`RSVPs`**.
+2. **Extensions → Apps Script**, delete the sample, and paste **`rsvp-backend.gs`** (in this repo).
+3. In that script set `ADMIN_PASSWORD` to the password you'll give the couple.
+4. **Deploy → New deployment → Web app**, *Execute as: Me*, *Who has access: Anyone*. Authorize, copy the **`…/exec` URL**.
+5. In **`assets/app.js`**, set `RSVP_ENDPOINT = "that /exec URL"`. Commit & push. Done — replies now flow into the Sheet, and the Hosts password is the one from step 3.
+
+> Notes: the public list shows only **name · party size · companions** — never emails
+> or notes. The couple can also just open the Sheet directly and use **File → Download
+> → CSV**. To change the password later, edit `ADMIN_PASSWORD` and re‑deploy a new
+> version (instructions are in `rsvp-backend.gs`). Apps Script is the friendliest
+> no‑server option for a non‑technical owner; once deployed, confirm a test reply
+> lands in the Sheet.
 
 ### 7. Contacts (from the invitation — already wired)
 Pulled straight from the printed suite: **Resort — Lynn Vosloo · 239.628.6269**
