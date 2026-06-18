@@ -110,22 +110,26 @@
 <section class="section savedate" id="savedate">
   <div class="narrow">
     <p class="eyebrow reveal">Save the Date</p>
+    <p class="savedate__cue reveal d1" id="heartsCue">Scratch the hearts</p>
 
-    <div class="scratch reveal d1">
-      <div class="scratch__under">
-        <p class="savedate__date">Saturday, May 8</p>
-        <p class="savedate__where">The vows, as the light turns gold</p>
+    <!-- Three hearts hide the day. Each canvas is scratched away (or Enter-revealed)
+         to uncover Day · Month · Year; all three open the line below. -->
+    <div class="hearts reveal d1" id="hearts" role="group" aria-label="Scratch the three hearts to reveal the day">
+      <div class="heart">
+        <div class="heart__under" aria-hidden="true"><span class="heart__label">Day</span><span class="heart__value">08</span></div>
+        <canvas class="heart__cover" id="heartCanvas1" tabindex="0" role="button" aria-label="Reveal the day — the eighth"></canvas>
       </div>
-      <canvas class="scratch__cover" id="scratch" tabindex="0" role="button"
-              aria-label="Scratch to reveal the day — or press Enter to reveal: Saturday, May 8, 2027 — the ceremony"></canvas>
+      <div class="heart">
+        <div class="heart__under" aria-hidden="true"><span class="heart__label">Month</span><span class="heart__value">May</span></div>
+        <canvas class="heart__cover" id="heartCanvas2" tabindex="0" role="button" aria-label="Reveal the month — May"></canvas>
+      </div>
+      <div class="heart">
+        <div class="heart__under" aria-hidden="true"><span class="heart__label">Year</span><span class="heart__value">2027</span></div>
+        <canvas class="heart__cover" id="heartCanvas3" tabindex="0" role="button" aria-label="Reveal the year — 2027"></canvas>
+      </div>
     </div>
-    <p class="scratch__hint" id="scratchHint">Scratch to reveal</p>
 
-    <div class="countdown reveal d2" id="countdown" aria-label="Countdown to the day">
-      <div class="count"><b data-cd="days">00</b><span>Days</span></div>
-      <div class="count"><b data-cd="hours">00</b><span>Hours</span></div>
-      <div class="count"><b data-cd="mins">00</b><span>Minutes</span></div>
-    </div>
+    <p class="savedate__revealed" id="savedateRevealed" aria-live="polite">Saturday &mdash; the vows, as the light turns gold.</p>
 
     <p class="savedate__more reveal d2">
       <a href="details.html">The details &rarr;</a>
