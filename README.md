@@ -19,13 +19,15 @@ ivory/ink palette with a quiet **Caribbean‑blue** accent, Cormorant Garamond +
 quiet‑luxury editorial layout) with one restrained signature gesture from the
 reference site — the envelope opening:
 
-- ✉️ **Envelope opening** — a wax‑sealed gate that breaks open and hands off to a
-  masked reveal of the names over the hero
+- ✉️ **Envelope opening** — a **full‑screen, fully opaque** dark takeover (nothing else
+  visible); the wax‑sealed envelope breaks open and dissolves to reveal the hero
 - 🎞️ **Cinematic hero** — a full‑bleed engagement photo, names anchored in the lower
   third, a slow ken‑burns and subtle scroll parallax for depth
+- 💛 **Scratch to reveal** — the Save‑the‑Date hides under a refined charcoal panel you
+  scratch (or press Enter) to reveal the dates
 - 🖼️ **Engagement gallery** — an editorial masonry with a tap‑to‑enlarge **lightbox**
   (swipe / arrows / keyboard)
-- ⏳ **Countdown** to the day (days · hours · minutes), a still editorial **Save the Date**
+- ⏳ **Countdown** to the day (days · hours · minutes)
 - 🔊 **Ambient sound** — **off by default**, opt‑in via the control bottom‑right (a
   quiet ring hints at it on entry); choice remembered across visits
 - 📜 Scroll reveals, editorial **itinerary**, full **RSVP**
