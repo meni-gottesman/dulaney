@@ -22,15 +22,23 @@
   }
 
   /* ---------- ENTRY GATE (home page only) — the opening film ----------
-     The couple's wax-sealed "J&M" envelope opens on film, then the gate
-     dissolves to hand the moment off to the hero name reveal. Muted, so it
-     auto-plays for "movement on open"; falls back to tap, and to a static
-     poster under reduced-motion. A guest is never stranded. */
+     The couple's "J&M" wax-heart envelope. It plays ONLY on a tap (poster +
+     "Tap to open" until then), with the film's own letter-opening sound, blooms
+     to white, and the site fades in from white. As the film ends, that sound
+     crossfades into the looping ambient track. Phones get a more zoomed-out
+     portrait cut. Audio is ON by default (a prior mute is respected). */
   const gate = $("#gate");
   const gateVideo = $("#gateVideo");
   let opened = false;
 
   if (gate && gateVideo) {
+    // phones get the more zoomed-out portrait cut
+    if (window.matchMedia("(max-width: 760px)").matches) {
+      $$("source", gateVideo).forEach(function (s) { s.src = s.src.replace(/opening\.(webm|mp4)/, "opening-m.$1"); });
+      gateVideo.setAttribute("poster", "assets/opening-m-poster.jpg");
+      gateVideo.load();
+    }
+
     var exitGate = function (focusTarget) {
       if (opened) return;
       opened = true;
@@ -44,18 +52,36 @@
       if (t) t.focus({ preventScroll: true });
     };
 
-    const gs = $("#gateSkip");
-    if (gs) gs.addEventListener("click", function () { startAudio(); exitGate(); });
+    // film's own audio on the tap → crossfade into the looping track
+    function startOpeningAudio() {
+      var want = "on";
+      try { want = localStorage.getItem("nevis_audio") || "on"; } catch (e) {}
+      if (want === "off") { gateVideo.muted = true; setAudioUI(false); return; }
+      gateVideo.muted = false; gateVideo.volume = 0.5;
+      if (hasRealTrack) { try { audioEl.volume = 0; audioEl.play().catch(function () {}); } catch (e) {} } // prime+unlock the loop
+      isOn = true; setAudioUI(true);
+      try { localStorage.setItem("nevis_audio", "on"); } catch (e) {}
+      var crossed = false;
+      function cross() {
+        if (crossed) return; crossed = true;
+        var fo = setInterval(function () { gateVideo.volume = Math.max(0, gateVideo.volume - 0.05); if (gateVideo.volume <= 0) clearInterval(fo); }, 80);
+        if (hasRealTrack) {
+          if (realFadeTimer) clearInterval(realFadeTimer);
+          realFadeTimer = setInterval(function () { audioEl.volume = Math.min(PEAK, audioEl.volume + 0.025); if (audioEl.volume >= PEAK) { clearInterval(realFadeTimer); realFadeTimer = null; } }, 110);
+        } else { enableAudio(); }
+      }
+      gateVideo.addEventListener("timeupdate", function () { if (gateVideo.duration && gateVideo.currentTime >= gateVideo.duration - 1.8) cross(); });
+      gateVideo.addEventListener("ended", cross);
+    }
 
     let returning = false;
     try { returning = sessionStorage.getItem("nevis_entered") === "1"; } catch (e) {}
 
     if (returning) {
-      // seen the film already this visit → straight in, no replay
       gate.classList.add("is-instant");
       exitGate();
     } else if (prefersReduced) {
-      // honour reduced motion: hold on the sealed poster, enter on tap/Enter
+      // honour reduced motion: hold on the sealed poster, enter on tap
       lockBackground(gate);
       gate.addEventListener("click", function () { startAudio(); exitGate(); });
     } else {
@@ -66,12 +92,10 @@
         const p = gateVideo.play();
         if (p && p.catch) p.catch(function () {});
       };
-      // The film opens ONLY when tapped — the sealed-envelope poster + "Tap to open"
-      // hold until then. (No autoplay, no auto-skip; a guest opens it deliberately.)
       gateVideo.addEventListener("playing", function () { gate.classList.add("is-playing"); });
       gateVideo.addEventListener("ended", function () { exitGate(); });
       gateVideo.addEventListener("error", function () { if (clicked) window.setTimeout(exitGate, 400); });
-      gate.addEventListener("click", function () { if (!opened && !clicked) { clicked = true; startAudio(); playFilm(); } });
+      gate.addEventListener("click", function () { if (!opened && !clicked) { clicked = true; startOpeningAudio(); playFilm(); } });
     }
   } else {
     // No gate on this page — show content immediately.
