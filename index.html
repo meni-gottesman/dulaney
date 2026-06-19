@@ -25,7 +25,7 @@
       imagesrcset="assets/hero-m.jpg 932w, assets/hero.jpg 1597w"
       imagesizes="100vw" fetchpriority="high" />
 
-<link rel="stylesheet" href="assets/style.css" />
+<link rel="stylesheet" href="assets/style.css?v=2" />
 </head>
 
 <body class="is-sealed">
@@ -36,9 +36,9 @@
      object-fit:cover fills the screen top-to-bottom on every size. -->
 <div class="gate" id="gate" role="dialog" aria-modal="true" aria-label="Your invitation">
   <video class="gate__video" id="gateVideo" playsinline muted preload="auto"
-         poster="assets/opening-poster.jpg" aria-hidden="true">
-    <source src="assets/opening.webm" type="video/webm" />
-    <source src="assets/opening.mp4" type="video/mp4" />
+         poster="assets/opening-poster.jpg?v=2" aria-hidden="true">
+    <source src="assets/opening.webm?v=2" type="video/webm" />
+    <source src="assets/opening.mp4?v=2" type="video/mp4" />
   </video>
   <p class="gate__hint" id="gateHint">Tap to open</p>
 </div>
@@ -50,7 +50,7 @@
 <!-- ambient.mp3 = envelope-opening sound → crossfade → song. JS loops only the
      song part (back to SONG_START), so the opening sound plays once. -->
 <audio id="audioEl" preload="auto">
-  <source src="assets/ambient.mp3" type="audio/mpeg" />
+  <source src="assets/ambient.mp3?v=2" type="audio/mpeg" />
 </audio>
 
 <!-- ====================== HEADER ====================== -->
@@ -258,6 +258,6 @@
   </div>
 </section>
 
-<script src="assets/app.js"></script>
+<script src="assets/app.js?v=2"></script>
 </body>
 </html>
