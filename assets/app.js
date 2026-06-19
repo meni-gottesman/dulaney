@@ -50,15 +50,10 @@
       var want = "on";
       try { want = localStorage.getItem("nevis_audio") || "on"; } catch (e) {}
       if (want === "off") { gateVideo.muted = true; setAudioUI(false); return; }
-      gateVideo.muted = false; // the film plays with its own (baked-quiet) letter-opening sound
-      if (hasRealTrack) primeLoop(); // unlock + start the loop on THIS gesture (silent at gain 0)
+      gateVideo.muted = false;  // the film plays with its own (baked-quiet) letter-opening sound
+      if (hasRealTrack) playLoop();  // start the looping music NOW — direct play, reliable on iOS
       isOn = true; setAudioUI(true);
       try { localStorage.setItem("nevis_audio", "on"); } catch (e) {}
-      // crossfade: bring the loop up as the film nears its end (gain ramp → works on iOS)
-      var crossed = false;
-      function cross() { if (crossed) return; crossed = true; rampReal(PEAK, 2.5); }
-      gateVideo.addEventListener("timeupdate", function () { if (gateVideo.duration && gateVideo.currentTime >= gateVideo.duration - 3.0) cross(); });
-      gateVideo.addEventListener("ended", cross);
     }
 
     let returning = false;
@@ -97,40 +92,25 @@
   const audioToggle = $("#audioToggle");
   const audioEl = $("#audioEl");
   const hasRealTrack = audioEl && audioEl.querySelector("source");
-  let audioCtx, master, started = false, isOn = false;
-  let realGain = null, realGraphBuilt = false;
+  let audioCtx, master, started = false, isOn = false, fadeTimer = null;
 
-  function getCtx() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    return audioCtx;
-  }
-  // Route the <audio> through a gain node ONCE so we can fade it on iOS.
-  function ensureRealGraph() {
-    if (realGraphBuilt || !hasRealTrack) return realGraphBuilt;
-    try {
-      const ctx = getCtx();
-      const src = ctx.createMediaElementSource(audioEl);
-      realGain = ctx.createGain();
-      realGain.gain.value = 0;
-      src.connect(realGain); realGain.connect(ctx.destination);
-      realGraphBuilt = true;
-    } catch (e) { realGraphBuilt = false; }
-    return realGraphBuilt;
-  }
-  function rampReal(target, secs) {
-    if (realGain && audioCtx) {
-      const now = audioCtx.currentTime;
-      realGain.gain.cancelScheduledValues(now);
-      realGain.gain.setValueAtTime(realGain.gain.value, now);
-      realGain.gain.linearRampToValueAtTime(target, now + (secs || 1.5));
-    } else { try { audioEl.volume = target; } catch (e) {} } // non-iOS fallback
-  }
-  // Start the loop — call the FIRST time inside a user gesture (unlocks iOS).
-  function primeLoop() {
+  // Play the looping <audio> DIRECTLY — the reliable path on iOS, where routing
+  // through Web Audio and setting element .volume both fail. The file is
+  // pre-leveled so it's gentle even though iOS ignores element volume; desktop
+  // additionally fades it up/out.
+  function playLoop() {
     if (!hasRealTrack) return;
-    ensureRealGraph();
-    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+    try { audioEl.volume = 0; } catch (e) {}
     const p = audioEl.play(); if (p && p.catch) p.catch(function () {});
+    if (fadeTimer) clearInterval(fadeTimer);
+    fadeTimer = setInterval(function () { // ramps 0→1 on desktop; instant no-op on iOS (volume read-only)
+      try { audioEl.volume = Math.min(1, audioEl.volume + 0.05); } catch (e) {}
+      if (audioEl.volume >= 1) { clearInterval(fadeTimer); fadeTimer = null; }
+    }, 90);
+  }
+  function pauseLoop() {
+    if (fadeTimer) { clearInterval(fadeTimer); fadeTimer = null; }
+    if (hasRealTrack) { try { audioEl.pause(); } catch (e) {} }
   }
 
   function buildPad() {
@@ -191,11 +171,9 @@
     enableAudio();
   }
 
-  const PEAK = 0.42; // gentle — ambient, never loud
   function enableAudio() {
     if (hasRealTrack) {
-      primeLoop();
-      rampReal(PEAK, 1.6);
+      playLoop();
     } else {
       if (!started) { try { buildPad(); started = true; } catch (e) { return; } }
       if (audioCtx.state === "suspended") audioCtx.resume();
@@ -206,10 +184,8 @@
   }
 
   function disableAudio() {
-    if (hasRealTrack) {
-      rampReal(0, 0.6);
-      window.setTimeout(function () { if (!isOn) { try { audioEl.pause(); } catch (e) {} } }, 800);
-    } else if (master) { fade(0.0001, 0.6); }
+    if (hasRealTrack) { pauseLoop(); }
+    else if (master) { fade(0.0001, 0.6); }
     isOn = false; setAudioUI(false);
     try { localStorage.setItem("nevis_audio", "off"); } catch (e) {}
   }
@@ -222,8 +198,16 @@
     audioToggle.setAttribute("aria-label", on ? "Mute ambient sound" : "Play ambient sound");
   }
 
-  if (audioToggle) audioToggle.addEventListener("click", () => {
-    if (isOn) disableAudio(); else enableAudio();
+  // Keep the control in sync with the element's REAL state (prevents the
+  // "click twice" bug where the UI said 'on' but nothing was actually playing).
+  if (audioEl) {
+    audioEl.addEventListener("playing", function () { isOn = true; setAudioUI(true); });
+    audioEl.addEventListener("pause", function () { if (hasRealTrack) { isOn = false; setAudioUI(false); } });
+  }
+
+  if (audioToggle) audioToggle.addEventListener("click", function () {
+    var playing = hasRealTrack ? (audioEl && !audioEl.paused) : isOn;
+    if (playing) disableAudio(); else enableAudio();
   });
 
   /* ---------- HEADER state + MENU ---------- */
