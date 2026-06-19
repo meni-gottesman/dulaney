@@ -191,11 +191,23 @@
     audioToggle.setAttribute("aria-label", on ? "Mute ambient sound" : "Play ambient sound");
   }
 
+  // ambient.mp3 = [envelope-opening sound] → crossfade → [song]. Loop ONLY the song
+  // part: jump back to where the song settles (after the crossfade) so the opening
+  // sound plays once, on the tap. Native loop on the element is a safety fallback.
+  const SONG_START = 5.0; // seconds — the song is clean from here (see the build)
   // Keep the control in sync with the element's REAL state (prevents the
   // "click twice" bug where the UI said 'on' but nothing was actually playing).
   if (audioEl) {
+    audioEl.addEventListener("timeupdate", function () { // seamless: jump back before the end
+      if (audioEl.duration && audioEl.currentTime > audioEl.duration - 0.5) {
+        try { audioEl.currentTime = SONG_START; } catch (e) {}
+      }
+    });
+    audioEl.addEventListener("ended", function () { // fallback if timeupdate ever misses
+      try { audioEl.currentTime = SONG_START; audioEl.play(); } catch (e) {}
+    });
     audioEl.addEventListener("playing", function () { isOn = true; setAudioUI(true); });
-    audioEl.addEventListener("pause", function () { if (hasRealTrack) { isOn = false; setAudioUI(false); } });
+    audioEl.addEventListener("pause", function () { if (hasRealTrack && audioEl.currentTime < audioEl.duration - 0.5) { isOn = false; setAudioUI(false); } });
   }
 
   if (audioToggle) audioToggle.addEventListener("click", function () {
