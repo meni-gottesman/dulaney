@@ -31,16 +31,16 @@
 <body class="is-sealed">
 
 <!-- ====================== ENTRY GATE (the opening film) ====================== -->
-<!-- The couple's own wax-sealed "J&M" envelope opening; auto-plays, then
-     dissolves to the hero. Poster = the sealed first frame (no flash). -->
+<!-- The couple's "J&M" wax-heart envelope — plays (with its own letter-opening
+     sound) on tap, blooms to white, then the site fades in from white. JS swaps in
+     a more zoomed-out portrait cut on mobile. -->
 <div class="gate" id="gate" role="dialog" aria-modal="true" aria-label="Your invitation">
-  <video class="gate__video" id="gateVideo" playsinline muted preload="auto"
+  <video class="gate__video" id="gateVideo" playsinline preload="auto"
          poster="assets/opening-poster.jpg" aria-hidden="true">
     <source src="assets/opening.webm" type="video/webm" />
     <source src="assets/opening.mp4" type="video/mp4" />
   </video>
   <p class="gate__hint" id="gateHint">Tap to open</p>
-  <button class="gate__skip" id="gateSkip">Enter</button>
 </div>
 
 <!-- ====================== AUDIO ====================== -->

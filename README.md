@@ -19,11 +19,12 @@ ivory/ink palette with a quiet **Caribbean‑blue** accent, Cormorant Garamond +
 quiet‑luxury editorial layout) with one restrained signature gesture from the
 reference site — the envelope opening:
 
-- ✉️ **Opening film** — a **full‑screen** takeover: an extreme close‑up of the couple's
-  cream handmade‑paper envelope, sealed with a red **"J&M" wax heart**. It **plays only
-  when tapped** (a sealed‑envelope poster + "Tap to open" until then); the envelope opens,
-  warm light blooms from inside, and the frame **whites out** — then the **site fades in
-  from white**. On phones the film is zoomed into the seal (`object-fit: cover`). A
+- ✉️ **Opening film** — a **full‑screen** takeover of the couple's cream handmade‑paper
+  envelope, sealed with a red **"J&M" wax heart**. It **plays only when tapped** (poster +
+  "Tap to open" until then), **with its own letter‑opening sound**; the envelope opens,
+  warm light blooms, the frame **whites out**, and the **site fades in from white** while
+  the sound **crossfades into the looping music**. Desktop uses the landscape cut; phones
+  get a more zoomed‑out portrait cut (`opening-m.*`, envelope on soft blurred paper). A
   returning visitor skips straight in (per‑session); reduced‑motion holds on the poster.
 - 🎞️ **Cinematic hero** — a full‑bleed engagement photo, names anchored in the lower
   third, a slow ken‑burns and subtle scroll parallax for depth
@@ -31,9 +32,9 @@ reference site — the envelope opening:
   under three wax‑heart scratch‑offs (or press Enter); all three open a live **countdown**
 - 🖼️ **Engagement gallery** — an editorial masonry with a tap‑to‑enlarge **lightbox**
   (swipe / arrows / keyboard)
-- 🔊 **Ambient music** — the track `assets/ambient.mp3` begins gently on the open‑envelope
-  tap (a real user gesture), loops, and can be muted any time via the control bottom‑right;
-  a guest's choice is remembered across visits
+- 🔊 **Ambient music** — `assets/ambient.mp3` (a looping romantic Italian melody) is **on
+  by default**: the film's letter‑opening sound crossfades into it on the open‑tap. Mute
+  any time via the control bottom‑right; a guest's choice is remembered across visits
 - 📜 Scroll reveals, editorial **itinerary**, full **RSVP**
 
 The palette is locked to a single light identity (no surprise dark mode), so the site
@@ -131,15 +132,19 @@ remain untouched in your `Dulaney Engagement.zip`.
 - **Re-optimize new images** with the macOS built-in (no installs):
   `sips -Z 1800 big-photo.jpg --out assets/gX.jpg` (then they're web-ready).
 
-### 4. Ambient music
-The track **`assets/ambient.mp3`** (Elijah K — *Ocean Daydreams*, re‑encoded to 128 kbps
-mono‑friendly MP3, looping) is wired into the `<audio id="audioEl">` tag and **begins
-gently when a guest taps the envelope to open it** (a real tap is required by browsers to
-start sound). It fades in, loops, and the control bottom‑right mutes/unmutes it; the choice
-is remembered across visits. To swap the song, replace `assets/ambient.mp3`. To make it
-**off by default** instead, change `let pref = "on"` back to `"off"` in `startAudio()`
-(`assets/app.js`). If no `<source>` is present, the site falls back to a soft synthesized
-pad.
+### 4. Ambient music + the film's own sound
+Two audio layers, crossfaded:
+- The **opening film keeps its own letter‑opening sound** (the gate `<video>` is no longer
+  muted; it's played on the tap at ~0.5 volume).
+- **`assets/ambient.mp3`** (a looping romantic Italian melody, *Amore al Mare*, 128 kbps) is
+  the ongoing ambient track, wired into `<audio id="audioEl">`.
+
+On the open‑tap the film's sound plays and the melody is primed silently; ~1.8 s before the
+film ends the film audio fades down while the melody fades up (a smooth **crossfade**), and
+the melody loops as the site reveals. It's **on by default**; the control bottom‑right
+mutes/unmutes and the choice is remembered. To swap either, replace `assets/ambient.mp3`
+(loop) or re‑encode the opening film. To make audio **off by default**, change
+`let want = "on"` / `let pref = "on"` to `"off"` in `assets/app.js`.
 
 ### 5. Registry links — still placeholders ⚠️
 The invitation didn't include registry info, so the two **Registry** links point at
