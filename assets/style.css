@@ -345,7 +345,11 @@ body.menu-open .audio-toggle { opacity: 0; pointer-events: none; }
 .hero__media { position: absolute; inset: -12% 0; z-index: -2; will-change: transform; background: #2b3a40; /* deep-water fallback if the photo is slow */ }
 /* object-position keeps the couple high-centre so the dolphin + lower water (where the
    type sits) stay in frame on portrait; on landscape it crops to the couple + water. */
-.hero__photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 52% 40%; }
+.hero__photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 52% 40%; transform-origin: 52% 42%; }
+/* As the page fades in FROM WHITE on reveal, the big photo zooms in a touch — slow,
+   front-loaded (most of the push happens during the white fade), then settles. */
+body.entered .hero__photo { animation: hero-reveal-zoom 14s cubic-bezier(.14,.6,.28,1) both; }
+@keyframes hero-reveal-zoom { from { transform: scale(1); } to { transform: scale(1.09); } }
 .kenburns { animation: kenburns 32s ease-in-out infinite alternate; transform-origin: 60% 50%; }
 @keyframes kenburns { from { transform: scale(1.02) } to { transform: scale(1.1) } }
 /* Darken only the bottom, where the restrained type sits; trust the photograph elsewhere. */
@@ -739,7 +743,7 @@ body.entered .hero__date { opacity: 1; transform: translateY(0); }
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; transition-delay: 0s !important; }
   .reveal { opacity: 1; transform: none; }
-  .kenburns { animation: none; }
+  .kenburns, body.entered .hero__photo { animation: none; }
   .hero__cue .line::after { animation: none; }
   /* Hero name/date masks: show immediately, no slide. */
   .hero__name > span, .hero__names .amp, .hero__date { transform: none !important; opacity: 1 !important; }

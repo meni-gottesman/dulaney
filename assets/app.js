@@ -74,7 +74,12 @@
         if (p && p.catch) p.catch(function () {});
       };
       gateVideo.addEventListener("playing", function () { gate.classList.add("is-playing"); });
-      gateVideo.addEventListener("ended", function () { exitGate(); });
+      gateVideo.addEventListener("ended", function () {
+        // line the song's swell up with the reveal: if the audio is still in the
+        // envelope/quiet part when the film ends, jump it to the swell-in point.
+        try { if (audioEl && hasRealTrack && !audioEl.paused && audioEl.currentTime < SONG_FADE_START) audioEl.currentTime = SONG_FADE_START; } catch (e) {}
+        exitGate();
+      });
       gateVideo.addEventListener("error", function () { if (clicked) window.setTimeout(exitGate, 400); });
       gate.addEventListener("click", function () { if (!opened && !clicked) { clicked = true; startOpeningAudio(); playFilm(); } });
     }
@@ -191,10 +196,11 @@
     audioToggle.setAttribute("aria-label", on ? "Mute ambient sound" : "Play ambient sound");
   }
 
-  // ambient.mp3 = [envelope-opening sound] → crossfade → [song]. Loop ONLY the song
-  // part: jump back to where the song settles (after the crossfade) so the opening
-  // sound plays once, on the tap. Native loop on the element is a safety fallback.
-  const SONG_START = 5.0; // seconds — the song is clean from here (see the build)
+  // ambient.mp3 = [envelope-opening sound 0–5.4s] → [song swells in from 5.4s]. The
+  // song is delayed so it OPENS as the site transitions from white. Loop ONLY the
+  // song part: jump back past the swell-in so the opening sound plays once, on entry.
+  const SONG_FADE_START = 5.4; // the song begins swelling here (≈ the film's white-out / reveal)
+  const SONG_START = 7.4;      // the song is clean from here (after the 2s swell) — loop point
   // Keep the control in sync with the element's REAL state (prevents the
   // "click twice" bug where the UI said 'on' but nothing was actually playing).
   if (audioEl) {
