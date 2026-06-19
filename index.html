@@ -47,7 +47,9 @@
 <button class="audio-toggle is-muted" id="audioToggle" aria-pressed="false" aria-label="Play ambient sound">
   <span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
 </button>
-<audio id="audioEl" loop preload="auto">
+<!-- ambient.mp3 = envelope-opening sound → crossfade → song. JS loops only the
+     song part (back to SONG_START), so the opening sound plays once. -->
+<audio id="audioEl" preload="auto">
   <source src="assets/ambient.mp3" type="audio/mpeg" />
 </audio>
 
