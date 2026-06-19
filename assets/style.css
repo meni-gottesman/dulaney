@@ -153,16 +153,21 @@ button { font-family: inherit; cursor: pointer; }
 .gate.is-instant, .gate.is-instant * { transition: none !important; }
 
 .gate__hint {
-  position: absolute; left: 0; right: 0; bottom: clamp(2.4rem, 8vh, 5rem);
+  position: absolute; left: 0; right: 0; top: 30%;
   z-index: 2; margin: 0; text-align: center;
   font-family: var(--font-sans); font-weight: 400; text-transform: uppercase;
-  letter-spacing: 0.32em; text-indent: 0.32em; font-size: clamp(0.68rem, 2.6vw, 0.8rem);
-  color: color-mix(in oklch, var(--ink) 70%, transparent);
-  transition: opacity .5s ease;
-  animation: tap-pulse 2.6s ease-in-out infinite;
+  letter-spacing: 0.32em; text-indent: 0.32em; font-size: clamp(0.72rem, 2.8vw, 0.86rem);
+  color: color-mix(in oklch, var(--ink) 74%, transparent);
+  transition: opacity .3s ease; /* fades away quickly once the film starts */
+  animation: tap-pulse 2.8s ease-in-out infinite;
+  will-change: transform, opacity;
 }
-@keyframes tap-pulse { 0%, 100% { opacity: 0.58 } 50% { opacity: 1 } }
-.gate.is-playing .gate__hint { opacity: 0 !important; animation: none; }
+/* a slow grow/shrink to catch the eye */
+@keyframes tap-pulse {
+  0%, 100% { transform: scale(0.96); opacity: 0.72; }
+  50%      { transform: scale(1.08); opacity: 1; }
+}
+.gate.is-playing .gate__hint { opacity: 0; animation: none; }
 
 /* ---- Page brighten-in: the site fades up as the gate lifts (and on sub-pages,
    on load), so the reveal is a soft brightening rather than a hard cut. ---- */
