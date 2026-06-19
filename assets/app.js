@@ -49,9 +49,8 @@
     function startOpeningAudio() {
       var want = "on";
       try { want = localStorage.getItem("nevis_audio") || "on"; } catch (e) {}
-      if (want === "off") { gateVideo.muted = true; setAudioUI(false); return; }
-      gateVideo.muted = false;  // the film plays with its own (baked-quiet) letter-opening sound
-      if (hasRealTrack) playLoop();  // start the looping music NOW — direct play, reliable on iOS
+      if (want === "off") { setAudioUI(false); return; }
+      if (hasRealTrack) playLoop();  // the film is muted; play ONLY the looping music (reliable on iOS)
       isOn = true; setAudioUI(true);
       try { localStorage.setItem("nevis_audio", "on"); } catch (e) {}
     }
@@ -92,24 +91,18 @@
   const audioToggle = $("#audioToggle");
   const audioEl = $("#audioEl");
   const hasRealTrack = audioEl && audioEl.querySelector("source");
-  let audioCtx, master, started = false, isOn = false, fadeTimer = null;
+  let audioCtx, master, started = false, isOn = false;
 
-  // Play the looping <audio> DIRECTLY — the reliable path on iOS, where routing
-  // through Web Audio and setting element .volume both fail. The file is
-  // pre-leveled so it's gentle even though iOS ignores element volume; desktop
-  // additionally fades it up/out.
+  // Play the looping <audio> as simply as possible — the only thing iOS reliably
+  // honours: a bare .play() on ONE media element inside a user gesture. No Web
+  // Audio, no volume changes (both are ignored/unreliable on iOS); the file is
+  // pre-leveled so it sits gently, and the gate video is MUTED so it never steals
+  // the audio session from this element.
   function playLoop() {
     if (!hasRealTrack) return;
-    try { audioEl.volume = 0; } catch (e) {}
     const p = audioEl.play(); if (p && p.catch) p.catch(function () {});
-    if (fadeTimer) clearInterval(fadeTimer);
-    fadeTimer = setInterval(function () { // ramps 0→1 on desktop; instant no-op on iOS (volume read-only)
-      try { audioEl.volume = Math.min(1, audioEl.volume + 0.05); } catch (e) {}
-      if (audioEl.volume >= 1) { clearInterval(fadeTimer); fadeTimer = null; }
-    }, 90);
   }
   function pauseLoop() {
-    if (fadeTimer) { clearInterval(fadeTimer); fadeTimer = null; }
     if (hasRealTrack) { try { audioEl.pause(); } catch (e) {} }
   }
 
