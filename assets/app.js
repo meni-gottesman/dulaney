@@ -32,13 +32,6 @@
   let opened = false;
 
   if (gate && gateVideo) {
-    // phones get the more zoomed-out portrait cut
-    if (window.matchMedia("(max-width: 760px)").matches) {
-      $$("source", gateVideo).forEach(function (s) { s.src = s.src.replace(/opening\.(webm|mp4)/, "opening-m.$1"); });
-      gateVideo.setAttribute("poster", "assets/opening-m-poster.jpg");
-      gateVideo.load();
-    }
-
     var exitGate = function (focusTarget) {
       if (opened) return;
       opened = true;

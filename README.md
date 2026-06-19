@@ -23,9 +23,9 @@ reference site — the envelope opening:
   envelope, sealed with a red **"J&M" wax heart**. It **plays only when tapped** (poster +
   "Tap to open" until then), **with its own letter‑opening sound**; the envelope opens,
   warm light blooms, the frame **whites out**, and the **site fades in from white** while
-  the sound **crossfades into the looping music**. Desktop uses the landscape cut; phones
-  get a more zoomed‑out portrait cut (`opening-m.*`, envelope on soft blurred paper). A
-  returning visitor skips straight in (per‑session); reduced‑motion holds on the poster.
+  the sound **crossfades into the looping music**. `object-fit: cover` fills the screen
+  top‑to‑bottom on every size (desktop sees the whole envelope; phones fill with the seal).
+  A returning visitor skips straight in (per‑session); reduced‑motion holds on the poster.
 - 🎞️ **Cinematic hero** — a full‑bleed engagement photo, names anchored in the lower
   third, a slow ken‑burns and subtle scroll parallax for depth
 - 💛 **Three hearts, scratch to reveal** — the Save‑the‑Date hides Day · Month · Year
