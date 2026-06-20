@@ -216,6 +216,23 @@
     audioEl.addEventListener("pause", function () { if (hasRealTrack && audioEl.currentTime < audioEl.duration - 0.5) { isOn = false; setAudioUI(false); } });
   }
 
+  // The <audio> starts at preload="metadata" so the 2.3MB track never competes with
+  // the opening for bandwidth. Once the page has painted and gone idle, quietly buffer
+  // it in the background so it's ready the instant the guest taps (no envelope-sound lag).
+  // (iOS ignores media preload until a gesture either way, so this is a desktop/Android win.)
+  if (audioEl && hasRealTrack) {
+    var warmAudio = function () {
+      if (!audioEl.paused || audioEl.currentTime > 0) return; // already started — don't disturb it
+      try { audioEl.preload = "auto"; audioEl.load(); } catch (e) {}
+    };
+    var scheduleWarm = function () {
+      if ("requestIdleCallback" in window) requestIdleCallback(warmAudio, { timeout: 2500 });
+      else window.setTimeout(warmAudio, 700);
+    };
+    if (document.readyState === "complete") scheduleWarm();
+    else window.addEventListener("load", scheduleWarm);
+  }
+
   if (audioToggle) audioToggle.addEventListener("click", function () {
     var playing = hasRealTrack ? (audioEl && !audioEl.paused) : isOn;
     if (playing) disableAudio(); else enableAudio();
