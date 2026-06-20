@@ -4,17 +4,35 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>The Dulaney Wedding — Nevis, West Indies · May 2027</title>
-<meta name="description" content="Jaden & McKenna Dulaney — bon voyage. A celebration at the Four Seasons, Nevis · May 6–10, 2027." />
+<meta name="description" content="Jaden &amp; McKenna Dulaney — bon voyage. A celebration at the Four Seasons, Nevis · May 6–10, 2027." />
 <meta name="theme-color" content="#f4efe4" />
 <meta name="color-scheme" content="light" />
+<link rel="canonical" href="https://meni-gottesman.github.io/dulaney/" />
+<!-- Private celebration — kept out of search engines. Remove this line to make the site discoverable. -->
+<meta name="robots" content="noindex, nofollow" />
+
+<!-- Open Graph / social share -->
+<meta property="og:site_name" content="The Dulaney Wedding" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://meni-gottesman.github.io/dulaney/" />
 <meta property="og:title" content="The Dulaney Wedding — Nevis, West Indies" />
 <meta property="og:description" content="Bon voyage. Four Seasons, Nevis · May 6–10, 2027 · For a select few." />
-<meta property="og:type" content="website" />
+<meta property="og:image" content="https://meni-gottesman.github.io/dulaney/assets/og.jpg" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Jaden &amp; McKenna on the water off Nevis" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="The Dulaney Wedding — Nevis, West Indies" />
 <meta name="twitter:description" content="Bon voyage. Four Seasons, Nevis · May 6–10, 2027 · For a select few." />
+<meta name="twitter:image" content="https://meni-gottesman.github.io/dulaney/assets/og.jpg" />
+<meta name="twitter:image:alt" content="Jaden &amp; McKenna on the water off Nevis" />
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23262114'/><text x='16' y='23' font-family='Georgia,serif' font-size='17' fill='%23f4efe4' text-anchor='middle'>D</text></svg>" />
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+<link rel="manifest" href="site.webmanifest" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -26,6 +44,20 @@
       imagesizes="100vw" fetchpriority="high" />
 
 <link rel="stylesheet" href="assets/style.css?v=2" />
+
+<!-- No-JS fallback: if scripts don't run, lift the opening film, unlock scroll,
+     and reveal all content so the site is never trapped behind the gate. -->
+<noscript><style>
+  #gate{display:none !important}
+  body.is-sealed{overflow:auto !important}
+  .reveal,main,.closing,.colophon,.site-header,.hero__photo{opacity:1 !important}
+  .reveal{transform:none !important}
+  .hero__name{overflow:visible !important}
+  .hero__name>span{transform:none !important}
+  .hero__date{opacity:1 !important;transform:none !important}
+  .closing__bg{background-image:url("assets/closing.jpg") !important}
+  .hero__photo,.closing__bg{animation:none !important}
+</style></noscript>
 </head>
 
 <body class="is-sealed">
@@ -49,7 +81,7 @@
 </button>
 <!-- ambient.mp3 = envelope-opening sound → crossfade → song. JS loops only the
      song part (back to SONG_START), so the opening sound plays once. -->
-<audio id="audioEl" preload="auto">
+<audio id="audioEl" preload="metadata">
   <source src="assets/ambient.mp3?v=2" type="audio/mpeg" />
 </audio>
 
@@ -258,6 +290,6 @@
   </div>
 </section>
 
-<script src="assets/app.js?v=2"></script>
+<script src="assets/app.js?v=3"></script>
 </body>
 </html>
