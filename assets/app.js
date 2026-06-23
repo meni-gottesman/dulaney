@@ -238,6 +238,17 @@
     if (playing) disableAudio(); else enableAudio();
   });
 
+  // Stop the music the moment the guest leaves or backgrounds the site — otherwise
+  // phones can keep it playing for a long time after they've moved on (the reported
+  // "it played for hours" bug). We only pause; the saved on/off preference is left
+  // untouched, so the music returns on the guest's next visit.
+  function silenceOnExit() {
+    if (hasRealTrack) { pauseLoop(); }
+    else if (audioCtx && master) { try { fade(0.0001, 0.25); if (audioCtx.state === "running") audioCtx.suspend(); } catch (e) {} }
+  }
+  document.addEventListener("visibilitychange", function () { if (document.hidden) silenceOnExit(); });
+  window.addEventListener("pagehide", silenceOnExit);
+
   /* ---------- HEADER state + MENU ---------- */
   const header = $("#header");
   const hero = $(".hero");
@@ -343,8 +354,8 @@
       const cd = $("#countdown");
       if (!cd || cd.dataset.started) return;
       cd.dataset.started = "1";
-      // Ceremony: Saturday, 8 May 2027, 4:00 PM Atlantic Standard Time (UTC−04:00).
-      const target = new Date("2027-05-08T16:00:00-04:00").getTime();
+      // Ceremony: Friday, 7 May 2027, 5:00 PM Atlantic Standard Time (UTC−04:00).
+      const target = new Date("2027-05-07T17:00:00-04:00").getTime();
       const dEl = cd.querySelector('[data-cd="days"]');
       const hEl = cd.querySelector('[data-cd="hours"]');
       const mEl = cd.querySelector('[data-cd="mins"]');
@@ -408,12 +419,24 @@
         onHeartOpen();
       }
 
+      let downX = 0, downY = 0, moved = false;
+      const TAP_SLOP = 10; // px of travel under which a press counts as a tap, not a scratch
+
       canvas.addEventListener("pointerdown", function (e) {
-        drawing = true; try { canvas.setPointerCapture(e.pointerId); } catch (x) {}
+        drawing = true; moved = false; downX = e.clientX; downY = e.clientY;
+        try { canvas.setPointerCapture(e.pointerId); } catch (x) {}
         scratch(e);
       });
-      canvas.addEventListener("pointermove", scratch);
-      canvas.addEventListener("pointerup", function () { drawing = false; });
+      canvas.addEventListener("pointermove", function (e) {
+        if (!moved && (Math.abs(e.clientX - downX) > TAP_SLOP || Math.abs(e.clientY - downY) > TAP_SLOP)) moved = true;
+        scratch(e);
+      });
+      canvas.addEventListener("pointerup", function () {
+        drawing = false;
+        // A simple TAP (no real dragging) reveals the whole heart, so no guest is left
+        // unsure how to "scratch". A drag still scratches and reveals past halfway.
+        if (!moved) reveal();
+      });
       canvas.addEventListener("pointercancel", function () { drawing = false; });
       canvas.addEventListener("keydown", function (e) {
         if (e.key === "Enter" || e.key === " ") { e.preventDefault(); reveal(); }
@@ -562,6 +585,8 @@
         attending: attending,
         companions: companions,
         party: attending === "yes" ? 1 + companions.length : 0,
+        song: ($("#weddingSong").value || "").trim(),
+        roomBooked: attending === "yes" ? ((form.querySelector('[name="roomBooked"]:checked') || {}).value || "") : "",
         note: ($("#note").value || "").trim(),
       };
       const btn = $("#rsvpSubmit");
@@ -601,6 +626,8 @@
           $("#guestName").value = mine.name || "";
           $("#guestEmail").value = mine.email || "";
           const r = form.querySelector('[name="attending"][value="' + mine.attending + '"]'); if (r) r.checked = true;
+          $("#weddingSong").value = mine.song || "";
+          if (mine.roomBooked) { const rb = form.querySelector('[name="roomBooked"][value="' + mine.roomBooked + '"]'); if (rb) rb.checked = true; }
           $("#note").value = mine.note || "";
           setCompanions(mine.companions);
           syncIfYes();
@@ -678,6 +705,8 @@
             '<span class="admin-row__email">' + esc(g.email) + '</span></div>' +
             '<div class="admin-row__meta"><span class="tag ' + (g.attending === "yes" ? "tag--yes" : "tag--no") + '">' + (g.attending === "yes" ? "Coming" : "Declined") + '</span>' +
             (party ? '<span class="admin-row__party">' + party + '</span>' : "") +
+            (g.song ? '<span class="admin-row__song">♪ ' + esc(g.song) + '</span>' : "") +
+            (g.roomBooked ? '<span class="admin-row__room tag ' + (g.roomBooked === "yes" ? "tag--yes" : "tag--no") + '">Room: ' + (g.roomBooked === "yes" ? "booked" : "not yet") + '</span>' : "") +
             (g.note ? '<span class="admin-row__note">“' + esc(g.note) + '”</span>' : "") + '</div>' +
             '<div class="admin-row__actions"><button type="button" class="link-btn" data-toggle="' + g.id + '">' + (g.attending === "yes" ? "Mark declined" : "Mark coming") + '</button>' +
             '<button type="button" class="link-btn link-btn--danger" data-remove="' + g.id + '">Remove</button></div>';
@@ -698,8 +727,8 @@
       const csvBtn = $("#downloadCsv");
       const csvCell = (v) => { v = String(v == null ? "" : v); return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
       if (csvBtn) csvBtn.addEventListener("click", () => {
-        const rows = [["Name", "Email", "Attending", "Party", "Companions", "Note", "Updated"]];
-        adminGuests.forEach((g) => rows.push([g.name, g.email, g.attending, g.party || "", (g.companions || []).join("; "), g.note || "", g.updated || ""]));
+        const rows = [["Name", "Email", "Attending", "Party", "Companions", "Wedding song", "Room booked", "Note", "Updated"]];
+        adminGuests.forEach((g) => rows.push([g.name, g.email, g.attending, g.party || "", (g.companions || []).join("; "), g.song || "", g.roomBooked || "", g.note || "", g.updated || ""]));
         const csv = rows.map((r) => r.map(csvCell).join(",")).join("\r\n");
         const a = document.createElement("a");
         a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
