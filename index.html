@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>The Dulaney Wedding — Nevis, West Indies · May 2027</title>
 <meta name="description" content="Jaden &amp; McKenna Dulaney — bon voyage. A celebration at the Four Seasons, Nevis · May 6–10, 2027." />
-<meta name="theme-color" content="#f4efe4" />
-<meta name="color-scheme" content="light" />
+<meta name="theme-color" content="#191512" />
+<meta name="color-scheme" content="dark" />
 <link rel="canonical" href="https://meni-gottesman.github.io/dulaney/" />
 <!-- Private celebration — kept out of search engines. Remove this line to make the site discoverable. -->
 <meta name="robots" content="noindex, nofollow" />
@@ -43,7 +43,7 @@
       imagesrcset="assets/hero-m.jpg 932w, assets/hero.jpg 1597w"
       imagesizes="100vw" fetchpriority="high" />
 
-<link rel="stylesheet" href="assets/style.css?v=2" />
+<link rel="stylesheet" href="assets/style.css?v=4" />
 
 <!-- No-JS fallback: if scripts don't run, lift the opening film, unlock scroll,
      and reveal all content so the site is never trapped behind the gate. -->
@@ -55,6 +55,7 @@
   .hero__name{overflow:visible !important}
   .hero__name>span{transform:none !important}
   .hero__date{opacity:1 !important;transform:none !important}
+  .savedate__revealed{opacity:1 !important;transform:none !important}
   .closing__bg{background-image:url("assets/closing.jpg") !important}
   .hero__photo,.closing__bg{animation:none !important}
 </style></noscript>
@@ -144,14 +145,14 @@
 <section class="section savedate" id="savedate">
   <div class="narrow">
     <p class="eyebrow reveal">Save the Date</p>
-    <p class="savedate__cue reveal d1" id="heartsCue">Scratch the hearts</p>
+    <p class="savedate__cue reveal d1" id="heartsCue">Tap each heart to reveal the day</p>
 
-    <!-- Three hearts hide the day. Each canvas is scratched away (or Enter-revealed)
+    <!-- Three hearts hide the day. Tap a heart to reveal it (or scratch / press Enter)
          to uncover Day · Month · Year; all three open the line below. -->
-    <div class="hearts reveal d1" id="hearts" role="group" aria-label="Scratch the three hearts to reveal the day">
+    <div class="hearts reveal d1" id="hearts" role="group" aria-label="Tap the three hearts to reveal the day">
       <div class="heart">
-        <div class="heart__under" aria-hidden="true"><span class="heart__label">Day</span><span class="heart__value">08</span></div>
-        <canvas class="heart__cover" id="heartCanvas1" tabindex="0" role="button" aria-label="Reveal the day — the eighth"></canvas>
+        <div class="heart__under" aria-hidden="true"><span class="heart__label">Day</span><span class="heart__value">07</span></div>
+        <canvas class="heart__cover" id="heartCanvas1" tabindex="0" role="button" aria-label="Reveal the day — the seventh"></canvas>
       </div>
       <div class="heart">
         <div class="heart__under" aria-hidden="true"><span class="heart__label">Month</span><span class="heart__value">May</span></div>
@@ -166,7 +167,7 @@
     <!-- Revealed only once all three hearts are scratched, so the countdown
          can't give the date away before the guest uncovers it. -->
     <div class="savedate__revealed" id="savedateRevealed" aria-live="polite">
-      <p class="savedate__line">Saturday &mdash; the vows, as the light turns gold.</p>
+      <p class="savedate__line">Friday &mdash; the vows, as the light turns gold.</p>
       <div class="countdown" id="countdown" aria-label="Time until the ceremony">
         <div class="count"><b data-cd="days">&mdash;&mdash;</b><span>Days</span></div>
         <div class="count"><b data-cd="hours">&mdash;&mdash;</b><span>Hours</span></div>
@@ -186,8 +187,8 @@
     <div class="editorial__head reveal" style="max-width:none; text-align:center; margin-inline:auto">
       <p class="eyebrow">RSVP</p>
       <h2 class="display editorial__title">Will you join us?</h2>
-      <!-- SWAP: confirm your real RSVP deadline (kept earlier than the room-block hold). -->
-      <p class="lede" style="margin-top:1.4rem; color:var(--charcoal)">Kindly reply by the first of July.</p>
+      <p class="lede" style="margin-top:1.4rem">Please know there is absolutely no expectation &mdash; only our gratitude, whether you join us in paradise or celebrate with us from home.</p>
+      <p class="field__hint" style="margin-top:1.1rem; font-size:0.92rem">Kindly reply by <strong>August 1</strong>. To hold your room within our block, a deposit is due by <strong>September 5</strong>, with the balance by <strong>February 1</strong>.</p>
     </div>
 
     <form class="form reveal d1" id="rsvpForm" novalidate>
@@ -212,6 +213,12 @@
         </fieldset>
       </div>
 
+      <div class="field">
+        <label for="weddingSong">Your wedding song</label>
+        <p class="field__hint">Married? Your wedding song. Not yet? Your favourite love song. We’ll be listening.</p>
+        <input type="text" id="weddingSong" name="song" autocomplete="off" required placeholder="Artist — Title" />
+      </div>
+
       <div id="ifYes">
         <div class="field">
           <label>Who’s joining you?</label>
@@ -220,7 +227,16 @@
           <button type="button" class="link-btn" id="addCompanion">+ Add a guest</button>
         </div>
         <div class="field">
-          <label for="note">A note, or a song that should play</label>
+          <fieldset>
+            <legend>Have you booked your room at the Four Seasons yet?</legend>
+            <div class="choice-row" role="radiogroup" aria-label="Room booking status">
+              <label class="chip"><input type="radio" name="roomBooked" value="yes" /><span>Yes, it’s booked</span></label>
+              <label class="chip"><input type="radio" name="roomBooked" value="not-yet" /><span>Not yet</span></label>
+            </div>
+          </fieldset>
+        </div>
+        <div class="field">
+          <label for="note">A note (optional)</label>
           <textarea id="note" name="note" placeholder="Anything you’d like us to know…"></textarea>
         </div>
       </div>
@@ -290,6 +306,6 @@
   </div>
 </section>
 
-<script src="assets/app.js?v=3"></script>
+<script src="assets/app.js?v=4"></script>
 </body>
 </html>

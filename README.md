@@ -1,7 +1,7 @@
 # The Dulaney Wedding — Jaden &amp; McKenna
 
 A cinematic, editorial wedding website for an intimate destination wedding at the
-**Four Seasons, Nevis** (West Indies), **May 6–10, 2027** — ceremony Saturday, May 8.
+**Four Seasons, Nevis** (West Indies), **May 6–10, 2027** — ceremony Friday, May 7 (5 PM, Oceanfront 18th Lawn).
 Built to reflect the printed invitation: *Bon Voyage · For a select few*.
 
 ### 🌐 Live
@@ -103,7 +103,7 @@ Save‑the‑Date (the scratch reveal), RSVP and the Closing. **`details.html`**
 Itinerary, Travel, Stay, Dress code and Registry. Edit in place. The ceremony
 countdown target lives in `assets/app.js`:
 ```js
-const target = new Date("2027-05-08T16:00:00-04:00").getTime(); // 4pm AST, Sat May 8
+const target = new Date("2027-05-07T17:00:00-04:00").getTime(); // 5pm AST, Fri May 7
 ```
 
 ### 2. Engagement photos (already integrated)
@@ -175,11 +175,14 @@ exposed in the page.
 > no‑server option for a non‑technical owner; once deployed, confirm a test reply
 > lands in the Sheet.
 
-### 7. Contacts (from the invitation — already wired)
-Pulled straight from the printed suite: **Resort — Lynn Vosloo · 239.628.6269**
-(Stay section, tappable `tel:` link) and **Flight — Brett Lafleur · 402.677.6578**
-(Travel section). Update these two if they change. Room block is held under **Dulaney**,
-reserve by **July 23, 2026**.
+### 7. Contacts & deadlines (already wired)
+Stay section: room block held under **“Dempsey–Dulaney Celebration”**; reservations
+**(869) 469-1111** and **reservations.nev@fourseason.com** (both tappable). Travel
+section: flight assistance **Brett Lafleur** (number to follow). RSVP deadlines:
+reply by **August 1**, room-block deposit by **September 5**, balance by **February 1, 2027**.
+Update these if they change. ⚠️ Confirm the resort email — it’s wired verbatim as
+`reservations.nev@fourseason.com` (singular “fourseason”); double-check it isn’t meant
+to be `reservations.nev@fourseasons.com`.
 
 ---
 
