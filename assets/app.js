@@ -196,22 +196,15 @@
     audioToggle.setAttribute("aria-label", on ? "Mute ambient sound" : "Play ambient sound");
   }
 
-  // ambient.mp3 = [envelope-opening sound 0–5.4s] → [song swells in from 5.4s]. The
-  // song is delayed so it OPENS as the site transitions from white. Loop ONLY the
-  // song part: jump back past the swell-in so the opening sound plays once, on entry.
+  // ambient.mp3 = [envelope-opening sound 0–5.4s] → [song swells in from 5.4s] →
+  // plays at full to ~10s → a gentle 6s fade-out, ending silent at ~16s. It plays
+  // ONCE (no loop): the fade-out is baked into the file so it works on iOS too,
+  // where HTMLMediaElement.volume is read-only and can't be ramped in JS.
   const SONG_FADE_START = 5.4; // the song begins swelling here (≈ the film's white-out / reveal)
-  const SONG_START = 7.4;      // the song is clean from here (after the 2s swell) — loop point
   // Keep the control in sync with the element's REAL state (prevents the
   // "click twice" bug where the UI said 'on' but nothing was actually playing).
   if (audioEl) {
-    audioEl.addEventListener("timeupdate", function () { // seamless: jump back before the end
-      if (audioEl.duration && audioEl.currentTime > audioEl.duration - 0.5) {
-        try { audioEl.currentTime = SONG_START; } catch (e) {}
-      }
-    });
-    audioEl.addEventListener("ended", function () { // fallback if timeupdate ever misses
-      try { audioEl.currentTime = SONG_START; audioEl.play(); } catch (e) {}
-    });
+    audioEl.addEventListener("ended", function () { isOn = false; setAudioUI(false); }); // track faded out — reflect "off"
     audioEl.addEventListener("playing", function () { isOn = true; setAudioUI(true); });
     audioEl.addEventListener("pause", function () { if (hasRealTrack && audioEl.currentTime < audioEl.duration - 0.5) { isOn = false; setAudioUI(false); } });
   }
