@@ -27,7 +27,10 @@
 
 var ADMIN_PASSWORD = "CHANGE-ME";       // the password you hand the couple
 var SHEET_NAME     = "RSVPs";
-var HEADERS = ["id", "name", "email", "attending", "party", "companions", "note", "updated"];
+// "photo" holds a small base64 data URL — the site resizes each photo to ~320px
+// first (≈15-25k chars), comfortably under Sheets' 50k-chars-per-cell limit.
+// Use a FRESH Sheet so all of these columns are created in order.
+var HEADERS = ["id", "name", "email", "attending", "party", "companions", "song", "roomBooked", "bio", "photo", "note", "updated"];
 
 function doPost(e) {
   var lock = LockService.getScriptLock();
@@ -71,7 +74,8 @@ function allRows_() {
       id: String(r[0]), name: r[1], email: r[2], attending: r[3],
       party: Number(r[4]) || 0,
       companions: r[5] ? String(r[5]).split(";").map(function (s) { return s.trim(); }).filter(Boolean) : [],
-      note: r[6], updated: r[7]
+      song: r[6] || "", roomBooked: r[7] || "", bio: r[8] || "", photo: r[9] || "",
+      note: r[10], updated: r[11]
     });
   }
   return rows;
@@ -79,7 +83,7 @@ function allRows_() {
 
 function publicList_() {
   return allRows_().filter(function (g) { return g.attending === "yes"; })
-    .map(function (g) { return { name: g.name, party: g.party, companions: g.companions }; });
+    .map(function (g) { return { name: g.name, party: g.party, companions: g.companions, bio: g.bio || "", photo: g.photo || "" }; });
 }
 
 function submit_(rec) {
@@ -93,7 +97,8 @@ function submit_(rec) {
   if (!id) id = Utilities.getUuid();
   var row = [
     id, rec.name || "", rec.email, rec.attending || "no",
-    Number(rec.party) || 0, (rec.companions || []).join("; "), rec.note || "",
+    Number(rec.party) || 0, (rec.companions || []).join("; "),
+    rec.song || "", rec.roomBooked || "", rec.bio || "", rec.photo || "", rec.note || "",
     new Date().toISOString()
   ];
   if (rowIndex > 0) sh.getRange(rowIndex, 1, 1, HEADERS.length).setValues([row]);
@@ -110,9 +115,13 @@ function update_(id, fields) {
       if (fields.attending != null) row[3] = fields.attending;
       if (fields.party != null) row[4] = Number(fields.party) || 0;
       if (fields.companions != null) row[5] = (fields.companions || []).join("; ");
-      if (fields.note != null) row[6] = fields.note;
+      if (fields.song != null) row[6] = fields.song;
+      if (fields.roomBooked != null) row[7] = fields.roomBooked;
+      if (fields.bio != null) row[8] = fields.bio;
+      if (fields.photo != null) row[9] = fields.photo;
+      if (fields.note != null) row[10] = fields.note;
       if (fields.name != null) row[1] = fields.name;
-      row[7] = new Date().toISOString();
+      row[11] = new Date().toISOString();
       sh.getRange(i + 1, 1, 1, HEADERS.length).setValues([row]);
       break;
     }

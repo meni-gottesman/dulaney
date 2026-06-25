@@ -504,8 +504,37 @@
     const lsAll = () => { try { return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); } catch (e) { return []; } };
     const lsSave = (a) => { try { localStorage.setItem(LS_KEY, JSON.stringify(a)); } catch (e) {} };
     const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-    const pub = (r) => ({ name: r.name, party: r.party, companions: r.companions || [] });
+    const safePhoto = (p) => (typeof p === "string" && /^data:image\//.test(p)) ? p : "";
+    const pub = (r) => ({ name: r.name, party: r.party, companions: r.companions || [], bio: r.bio || "", photo: safePhoto(r.photo) });
     const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    const initialsOf = (name) => (String(name || "?").trim().split(/\s+/).map((w) => w[0]).filter(Boolean).slice(0, 2).join("") || "?").toUpperCase();
+
+    // Resize an uploaded image to a small square avatar data URL. Re-encoding via
+    // canvas also sanitises it (strips EXIF / any non-image payload) and keeps it
+    // small enough to store inline (≈320px JPEG, centre-cropped).
+    function fileToAvatar(file) {
+      return new Promise(function (resolve, reject) {
+        if (!file || !/^image\//.test(file.type || "")) { reject(new Error("not an image")); return; }
+        if (file.size > 25 * 1024 * 1024) { reject(new Error("too large")); return; }
+        const fr = new FileReader();
+        fr.onerror = function () { reject(new Error("read failed")); };
+        fr.onload = function () {
+          const img = new Image();
+          img.onerror = function () { reject(new Error("decode failed")); };
+          img.onload = function () {
+            try {
+              const S = 320, c = document.createElement("canvas"); c.width = S; c.height = S;
+              const ctx = c.getContext("2d");
+              const side = Math.min(img.width, img.height);
+              ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, S, S);
+              resolve(c.toDataURL("image/jpeg", 0.72));
+            } catch (e) { reject(e); }
+          };
+          img.src = fr.result;
+        };
+        fr.readAsDataURL(file);
+      });
+    }
 
     const api = {
       submit(rec) {
@@ -567,6 +596,31 @@
     /* ----- submit ----- */
     const statusEl = $("#rsvpStatus");
     const thanks = $("#rsvpThanks");
+
+    /* ----- photo + bio (shown on the public "On the island" list) ----- */
+    let pendingPhoto = "";
+    const photoInput = $("#guestPhoto");
+    const photoPreview = $("#photoPreview");
+    const photoClear = $("#photoClear");
+    const photoChoose = $("#photoChoose");
+    function setPhotoPreview(url) {
+      pendingPhoto = safePhoto(url);
+      if (photoPreview) {
+        if (pendingPhoto) { photoPreview.src = pendingPhoto; photoPreview.hidden = false; }
+        else { photoPreview.removeAttribute("src"); photoPreview.hidden = true; }
+      }
+      if (photoClear) photoClear.hidden = !pendingPhoto;
+    }
+    if (photoChoose && photoInput) photoChoose.addEventListener("click", () => photoInput.click());
+    if (photoInput) photoInput.addEventListener("change", function () {
+      const f = photoInput.files && photoInput.files[0];
+      if (!f) return;
+      statusEl.textContent = "Adding your photo…";
+      fileToAvatar(f).then(function (url) { setPhotoPreview(url); statusEl.textContent = ""; })
+        .catch(function () { statusEl.textContent = "That image didn’t work — please try another."; });
+    });
+    if (photoClear) photoClear.addEventListener("click", function () { setPhotoPreview(""); if (photoInput) photoInput.value = ""; });
+
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       if (!form.reportValidity()) return;
@@ -580,6 +634,8 @@
         party: attending === "yes" ? 1 + companions.length : 0,
         song: ($("#weddingSong").value || "").trim(),
         roomBooked: attending === "yes" ? ((form.querySelector('[name="roomBooked"]:checked') || {}).value || "") : "",
+        bio: attending === "yes" ? ($("#guestBio").value || "").trim() : "",
+        photo: attending === "yes" ? pendingPhoto : "",
         note: ($("#note").value || "").trim(),
       };
       const btn = $("#rsvpSubmit");
@@ -621,6 +677,8 @@
           const r = form.querySelector('[name="attending"][value="' + mine.attending + '"]'); if (r) r.checked = true;
           $("#weddingSong").value = mine.song || "";
           if (mine.roomBooked) { const rb = form.querySelector('[name="roomBooked"][value="' + mine.roomBooked + '"]'); if (rb) rb.checked = true; }
+          $("#guestBio").value = mine.bio || "";
+          setPhotoPreview(safePhoto(mine.photo));
           $("#note").value = mine.note || "";
           setCompanions(mine.companions);
           syncIfYes();
@@ -646,7 +704,15 @@
           const withText = (g.companions && g.companions.length) ? "with " + g.companions.join(", ") : "";
           const partyText = g.party > 1 ? "party of " + g.party : "";
           const meta = [partyText, withText].filter(Boolean).join(" · ");
-          li.innerHTML = '<span class="g-name">' + esc(g.name) + "</span>" + (meta ? '<span class="g-meta">' + esc(meta) + "</span>" : "");
+          const photo = safePhoto(g.photo);
+          const avatar = photo
+            ? '<span class="g-avatar"><img src="' + photo + '" alt="" loading="lazy" decoding="async" /></span>'
+            : '<span class="g-avatar g-avatar--ph" aria-hidden="true">' + esc(initialsOf(g.name)) + '</span>';
+          li.innerHTML = avatar +
+            '<span class="g-text"><span class="g-name">' + esc(g.name) + '</span>' +
+            (meta ? '<span class="g-meta">' + esc(meta) + '</span>' : '') +
+            (g.bio ? '<span class="g-bio">' + esc(g.bio) + '</span>' : '') +
+            '</span>';
           glItems.appendChild(li);
         });
       }).catch(() => {});
@@ -661,7 +727,18 @@
       const adminErr = $("#adminError");
       const adminList = $("#adminList");
       const adminSummary = $("#adminSummary");
-      let adminPw = "", adminGuests = [];
+      let adminPw = "", adminGuests = [], adminPhotoTargetId = null;
+      const adminPhotoInput = $("#adminPhotoInput");
+      // Host uploads/replaces a guest's photo via this one shared file input.
+      if (adminPhotoInput) adminPhotoInput.addEventListener("change", function () {
+        const f = adminPhotoInput.files && adminPhotoInput.files[0];
+        const id = adminPhotoTargetId;
+        if (!f || !id) return;
+        adminSummary.textContent = "Adding photo…";
+        fileToAvatar(f).then(function (url) { return api.adminUpdate(adminPw, id, { photo: url }); })
+          .then(function (res) { adminGuests = res.guests || adminGuests; renderAdmin(); loadGuestList(); })
+          .catch(function () { adminSummary.textContent = "That image didn’t work — please try another."; });
+      });
 
       const openAdmin = () => { admin.hidden = false; body.classList.add("menu-open"); $("#adminPw").focus(); };
       const closeAdmin = () => { admin.hidden = true; body.classList.remove("menu-open"); if (location.hash === "#admin") history.replaceState(null, "", location.pathname + location.search); };
@@ -693,35 +770,60 @@
           const row = document.createElement("div");
           row.className = "admin-row";
           const party = g.attending === "yes" ? "party of " + (g.party || 1) + ((g.companions && g.companions.length) ? ": " + esc(g.companions.join(", ")) : "") : "";
+          const photo = safePhoto(g.photo);
+          const avatar = photo
+            ? '<span class="admin-avatar"><img src="' + photo + '" alt="" /></span>'
+            : '<span class="admin-avatar admin-avatar--ph" aria-hidden="true">' + esc(initialsOf(g.name)) + '</span>';
           row.innerHTML =
-            '<div class="admin-row__main"><span class="admin-row__name">' + esc(g.name) + '</span>' +
-            '<span class="admin-row__email">' + esc(g.email) + '</span></div>' +
+            '<div class="admin-row__id">' + avatar +
+              '<div class="admin-row__main"><span class="admin-row__name">' + esc(g.name) + '</span>' +
+              '<span class="admin-row__email">' + esc(g.email) + '</span></div></div>' +
             '<div class="admin-row__meta"><span class="tag ' + (g.attending === "yes" ? "tag--yes" : "tag--no") + '">' + (g.attending === "yes" ? "Coming" : "Declined") + '</span>' +
             (party ? '<span class="admin-row__party">' + party + '</span>' : "") +
             (g.song ? '<span class="admin-row__song">♪ ' + esc(g.song) + '</span>' : "") +
             (g.roomBooked ? '<span class="admin-row__room tag ' + (g.roomBooked === "yes" ? "tag--yes" : "tag--no") + '">Room: ' + (g.roomBooked === "yes" ? "booked" : "not yet") + '</span>' : "") +
             (g.note ? '<span class="admin-row__note">“' + esc(g.note) + '”</span>' : "") + '</div>' +
             '<div class="admin-row__actions"><button type="button" class="link-btn" data-toggle="' + g.id + '">' + (g.attending === "yes" ? "Mark declined" : "Mark coming") + '</button>' +
-            '<button type="button" class="link-btn link-btn--danger" data-remove="' + g.id + '">Remove</button></div>';
+            '<button type="button" class="link-btn link-btn--danger" data-remove="' + g.id + '">Remove</button></div>' +
+            '<div class="admin-row__bio">' +
+              '<input type="text" class="admin-bio-input" maxlength="140" placeholder="Add a little bio for the guest list…" value="' + esc(g.bio || "") + '" data-bio="' + g.id + '" aria-label="Bio for ' + esc(g.name) + '" />' +
+              '<button type="button" class="link-btn" data-savebio="' + g.id + '">Save bio</button>' +
+              '<button type="button" class="link-btn" data-photo="' + g.id + '">' + (photo ? "Replace photo" : "Add photo") + '</button>' +
+              (photo ? '<button type="button" class="link-btn link-btn--danger" data-delphoto="' + g.id + '">Remove photo</button>' : "") +
+            '</div>';
           adminList.appendChild(row);
         });
+        const reload = (res) => { adminGuests = res.guests || adminGuests; renderAdmin(); loadGuestList(); };
         $$("[data-toggle]", adminList).forEach((b) => b.addEventListener("click", () => {
           const id = b.getAttribute("data-toggle"), g = adminGuests.find((x) => x.id === id);
           const next = g.attending === "yes" ? "no" : "yes";
-          api.adminUpdate(adminPw, id, { attending: next, party: next === "yes" ? (g.party || 1) : 0 }).then((res) => { adminGuests = res.guests || adminGuests; renderAdmin(); loadGuestList(); });
+          api.adminUpdate(adminPw, id, { attending: next, party: next === "yes" ? (g.party || 1) : 0 }).then(reload);
         }));
         $$("[data-remove]", adminList).forEach((b) => b.addEventListener("click", () => {
           const id = b.getAttribute("data-remove"), g = adminGuests.find((x) => x.id === id);
           if (!window.confirm("Remove " + (g ? g.name : "this guest") + " from the list?")) return;
-          api.adminRemove(adminPw, id).then((res) => { adminGuests = res.guests || adminGuests; renderAdmin(); loadGuestList(); });
+          api.adminRemove(adminPw, id).then(reload);
+        }));
+        $$("[data-savebio]", adminList).forEach((b) => b.addEventListener("click", () => {
+          const id = b.getAttribute("data-savebio");
+          const input = adminList.querySelector('[data-bio="' + id + '"]');
+          b.textContent = "Saving…"; b.disabled = true;
+          api.adminUpdate(adminPw, id, { bio: input ? input.value.trim() : "" }).then(reload);
+        }));
+        $$("[data-photo]", adminList).forEach((b) => b.addEventListener("click", () => {
+          adminPhotoTargetId = b.getAttribute("data-photo");
+          if (adminPhotoInput) { adminPhotoInput.value = ""; adminPhotoInput.click(); }
+        }));
+        $$("[data-delphoto]", adminList).forEach((b) => b.addEventListener("click", () => {
+          api.adminUpdate(adminPw, b.getAttribute("data-delphoto"), { photo: "" }).then(reload);
         }));
       }
 
       const csvBtn = $("#downloadCsv");
       const csvCell = (v) => { v = String(v == null ? "" : v); return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
       if (csvBtn) csvBtn.addEventListener("click", () => {
-        const rows = [["Name", "Email", "Attending", "Party", "Companions", "Wedding song", "Room booked", "Note", "Updated"]];
-        adminGuests.forEach((g) => rows.push([g.name, g.email, g.attending, g.party || "", (g.companions || []).join("; "), g.song || "", g.roomBooked || "", g.note || "", g.updated || ""]));
+        const rows = [["Name", "Email", "Attending", "Party", "Companions", "Wedding song", "Room booked", "Bio", "Has photo", "Note", "Updated"]];
+        adminGuests.forEach((g) => rows.push([g.name, g.email, g.attending, g.party || "", (g.companions || []).join("; "), g.song || "", g.roomBooked || "", g.bio || "", (safePhoto(g.photo) ? "yes" : ""), g.note || "", g.updated || ""]));
         const csv = rows.map((r) => r.map(csvCell).join(",")).join("\r\n");
         const a = document.createElement("a");
         a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));

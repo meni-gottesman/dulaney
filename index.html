@@ -43,7 +43,7 @@
       imagesrcset="assets/hero-m.jpg 932w, assets/hero.jpg 1597w"
       imagesizes="100vw" fetchpriority="high" />
 
-<link rel="stylesheet" href="assets/style.css?v=4" />
+<link rel="stylesheet" href="assets/style.css?v=6" />
 
 <!-- No-JS fallback: if scripts don't run, lift the opening film, unlock scroll,
      and reveal all content so the site is never trapped behind the gate. -->
@@ -236,6 +236,23 @@
           </fieldset>
         </div>
         <div class="field">
+          <label for="guestBio">A little bio <span class="field__opt">(optional)</span></label>
+          <p class="field__hint">A line about you for the guest list — where you’re from, how you know Jaden &amp; McKenna, anything. We can add one for you too.</p>
+          <input type="text" id="guestBio" name="bio" maxlength="140" autocomplete="off" placeholder="Old friends of the groom, in from Lisbon…" />
+        </div>
+        <div class="field">
+          <label>A photo <span class="field__opt">(optional)</span></label>
+          <p class="field__hint">Add a photo to your place on the guest list.</p>
+          <div class="photo-field">
+            <img class="photo-preview" id="photoPreview" alt="Your photo preview" hidden />
+            <span class="photo-field__btns">
+              <button type="button" class="link-btn" id="photoChoose">Choose a photo</button>
+              <input type="file" id="guestPhoto" accept="image/*" hidden />
+              <button type="button" class="link-btn link-btn--danger" id="photoClear" hidden>Remove</button>
+            </span>
+          </div>
+        </div>
+        <div class="field">
           <label for="note">A note (optional)</label>
           <textarea id="note" name="note" placeholder="Anything you’d like us to know…"></textarea>
         </div>
@@ -302,10 +319,11 @@
         <button class="btn btn--ghost" type="button" id="downloadCsv">Download CSV</button>
       </div>
       <div class="admin__list" id="adminList"></div>
+      <input type="file" id="adminPhotoInput" accept="image/*" hidden />
     </div>
   </div>
 </section>
 
-<script src="assets/app.js?v=5"></script>
+<script src="assets/app.js?v=6"></script>
 </body>
 </html>
