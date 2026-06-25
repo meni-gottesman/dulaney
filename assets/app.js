@@ -822,8 +822,8 @@
       const csvBtn = $("#downloadCsv");
       const csvCell = (v) => { v = String(v == null ? "" : v); return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
       if (csvBtn) csvBtn.addEventListener("click", () => {
-        const rows = [["Name", "Email", "Attending", "Party", "Companions", "Wedding song", "Room booked", "Bio", "Has photo", "Note", "Updated"]];
-        adminGuests.forEach((g) => rows.push([g.name, g.email, g.attending, g.party || "", (g.companions || []).join("; "), g.song || "", g.roomBooked || "", g.bio || "", (safePhoto(g.photo) ? "yes" : ""), g.note || "", g.updated || ""]));
+        const rows = [["Name", "Email", "Attending", "Party", "Companions", "Wedding song", "Room booked", "Bio", "Photo (paste in browser)", "Note", "Updated"]];
+        adminGuests.forEach((g) => rows.push([g.name, g.email, g.attending, g.party || "", (g.companions || []).join("; "), g.song || "", g.roomBooked || "", g.bio || "", safePhoto(g.photo) || "", g.note || "", g.updated || ""]));
         const csv = rows.map((r) => r.map(csvCell).join(",")).join("\r\n");
         const a = document.createElement("a");
         a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
