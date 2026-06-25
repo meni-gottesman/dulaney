@@ -672,13 +672,24 @@ body.entered .hero__date { opacity: 1; transform: translateY(0); }
 }
 .companion__remove:hover { border-color: var(--accent); color: var(--accent); }
 
+/* RSVP photo + bio field (guest side) */
+.field__opt { color: var(--muted-fg); font-size: 0.85em; letter-spacing: 0; text-transform: none; }
+.photo-field { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.photo-field__btns { display: inline-flex; gap: 1rem; align-items: center; }
+.photo-preview { width: 68px; height: 68px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); display: block; background: color-mix(in oklch, var(--soft) 55%, var(--border)); }
+
 /* public guest list — who's coming */
 .guestlist { margin-top: clamp(3rem, 7vw, 5rem); border-top: 1px solid var(--border); padding-top: clamp(2.4rem, 5vw, 3.4rem); }
 .guestlist__count { font-size: clamp(1.8rem, 5vw, 2.8rem); text-align: center; margin: 0.6rem 0 0; }
 .guestlist__items { list-style: none; margin: clamp(1.6rem, 4vw, 2.4rem) 0 0; padding: 0; display: grid; gap: 0.1rem; max-width: 32rem; margin-inline: auto; }
-.guestlist__item { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.4rem 1rem; padding: 0.85rem 0; border-bottom: 1px solid var(--border); }
-.guestlist__item .g-name { font-family: var(--font-display); font-size: 1.45rem; color: var(--fg); }
-.guestlist__item .g-meta { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.18em; color: var(--muted-fg); }
+.guestlist__item { display: flex; align-items: center; gap: 0.95rem; padding: 0.9rem 0; border-bottom: 1px solid var(--border); }
+.guestlist__item .g-avatar { flex: 0 0 auto; width: 54px; height: 54px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: color-mix(in oklch, var(--soft) 55%, var(--border)); }
+.guestlist__item .g-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.guestlist__item .g-avatar--ph { font-family: var(--font-display); font-weight: 500; font-size: 1.25rem; color: var(--accent); }
+.guestlist__item .g-text { display: flex; flex-direction: column; gap: 0.12rem; min-width: 0; }
+.guestlist__item .g-name { font-family: var(--font-display); font-size: 1.45rem; line-height: 1.15; color: var(--fg); }
+.guestlist__item .g-meta { font-family: var(--font-sans); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.18em; color: var(--muted-fg); }
+.guestlist__item .g-bio { font-family: var(--font-display); font-style: italic; font-size: 1.02rem; line-height: 1.35; color: var(--charcoal); margin-top: 0.1rem; }
 .guestlist__empty { text-align: center; color: var(--muted-fg); font-style: italic; font-family: var(--font-display); font-size: 1.2rem; }
 
 /* hosts link (discreet, in the colophon) */
@@ -705,6 +716,13 @@ body.entered .hero__date { opacity: 1; transform: translateY(0); }
 .admin-row__main { display: grid; gap: 0.15rem; }
 .admin-row__name { font-family: var(--font-display); font-size: 1.25rem; color: var(--fg); }
 .admin-row__song { color: var(--accent); font-style: italic; }
+.admin-row__id { display: flex; align-items: center; gap: 0.8rem; min-width: 0; }
+.admin-avatar { flex: 0 0 auto; width: 46px; height: 46px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: color-mix(in oklch, var(--soft) 55%, var(--border)); }
+.admin-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.admin-avatar--ph { font-family: var(--font-display); font-weight: 500; color: var(--accent); }
+.admin-row__bio { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 0.5rem 0.8rem; align-items: center; margin-top: 0.5rem; }
+.admin-bio-input { flex: 1 1 14rem; min-width: 0; font-family: var(--font-sans); font-size: 0.92rem; color: var(--fg); background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.5rem 0.7rem; }
+.admin-bio-input:focus { border-color: var(--accent); outline: none; }
 .admin-row__email { font-family: var(--font-sans); font-size: 0.72rem; color: var(--muted-fg); word-break: break-all; }
 .admin-row__meta { display: flex; flex-wrap: wrap; gap: 0.5rem 0.8rem; align-items: baseline; font-size: 0.78rem; color: var(--charcoal); }
 .admin-row__note { font-style: italic; color: var(--muted-fg); }
