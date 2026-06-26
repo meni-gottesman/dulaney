@@ -39,6 +39,13 @@
   --hero-photo: url("hero.jpg");
 }
 @media (max-width: 760px) { :root { --hero-photo: url("hero-m.jpg"); } }
+/* On a tall phone the landscape opening film is cropped tight by object-fit:cover
+   (the seal dominates). Show more of the envelope — a touch zoomed out — by fitting
+   the whole frame and scaling it up just enough to keep the white matte minimal;
+   the matte melts into the film's white bloom. */
+@media (max-width: 760px) {
+  .gate .gate__video { object-fit: contain; transform: scale(var(--gate-zoom, 2.8)); transform-origin: center; }
+}
 
 /* A wedding invitation is a fixed identity — it should look the same in every
    guest’s hand. A single dark identity (no light/dark toggle), warm and editorial. */
