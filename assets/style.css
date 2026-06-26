@@ -44,7 +44,10 @@
    the whole frame and scaling it up just enough to keep the white matte minimal;
    the matte melts into the film's white bloom. */
 @media (max-width: 760px) {
-  .gate .gate__video { object-fit: contain; transform: scale(var(--gate-zoom, 2.8)); transform-origin: center; }
+  .gate .gate__video { object-fit: contain; transform: scale(var(--gate-zoom, 2.3)); transform-origin: center; }
+  /* The film is matted in white on phones (so the whole envelope shows); drop the
+     hint down onto the navy envelope (below the white matte) where the light text reads. */
+  .gate .gate__hint { top: 37%; }
 }
 
 /* A wedding invitation is a fixed identity — it should look the same in every
