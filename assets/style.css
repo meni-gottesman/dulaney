@@ -160,7 +160,10 @@ button { font-family: inherit; cursor: pointer; }
   z-index: 2; margin: 0; text-align: center;
   font-family: var(--font-sans); font-weight: 400; text-transform: uppercase;
   letter-spacing: 0.32em; text-indent: 0.32em; font-size: clamp(0.72rem, 2.8vw, 0.86rem);
-  color: color-mix(in oklch, var(--ink) 74%, transparent);
+  /* Light, for legibility on the dark navy envelope (the film blooms to white,
+     and the hint has already faded by then). */
+  color: color-mix(in oklch, var(--ivory) 88%, transparent);
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.55);
   transition: opacity .3s ease; /* fades away quickly once the film starts */
   animation: tap-pulse 2.8s ease-in-out infinite;
   will-change: transform, opacity;
