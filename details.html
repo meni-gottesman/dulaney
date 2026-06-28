@@ -7,6 +7,12 @@
 <meta name="description" content="Itinerary, travel, accommodations, dress code and registry for the Dulaney wedding — Four Seasons, Nevis · May 6–10, 2027." />
 <meta name="theme-color" content="#191512" />
 <meta name="color-scheme" content="dark" />
+
+<!-- Private access gate — hide everything until unlocked (assets/lock.js) -->
+<script>(function(){try{if(localStorage.getItem('nevis_access_v1')==='granted')return;}catch(e){}document.documentElement.classList.add('locked');})();</script>
+<style>html.locked{background:#191512}html.locked body>*:not(#lockscreen){visibility:hidden!important}html.locked,html.locked body{overflow:hidden!important}</style>
+<script defer src="assets/lock.js?v=11"></script>
+
 <link rel="canonical" href="https://meni-gottesman.github.io/dulaney/details.html" />
 <meta name="robots" content="noindex, nofollow" />
 
@@ -37,7 +43,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
 
-<link rel="stylesheet" href="assets/style.css?v=10" />
+<link rel="stylesheet" href="assets/style.css?v=11" />
 
 <!-- No-JS fallback: reveal all content if scripts don't run. -->
 <noscript><style>

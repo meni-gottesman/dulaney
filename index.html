@@ -7,6 +7,12 @@
 <meta name="description" content="Jaden &amp; McKenna Dulaney — bon voyage. A celebration at the Four Seasons, Nevis · May 6–10, 2027." />
 <meta name="theme-color" content="#191512" />
 <meta name="color-scheme" content="dark" />
+
+<!-- Private access gate — hide everything until unlocked (assets/lock.js) -->
+<script>(function(){try{if(localStorage.getItem('nevis_access_v1')==='granted')return;}catch(e){}document.documentElement.classList.add('locked');})();</script>
+<style>html.locked{background:#191512}html.locked body>*:not(#lockscreen){visibility:hidden!important}html.locked,html.locked body{overflow:hidden!important}</style>
+<script defer src="assets/lock.js?v=11"></script>
+
 <link rel="canonical" href="https://meni-gottesman.github.io/dulaney/" />
 <!-- Private celebration — kept out of search engines. Remove this line to make the site discoverable. -->
 <meta name="robots" content="noindex, nofollow" />
@@ -43,7 +49,7 @@
       imagesrcset="assets/hero-m.jpg 932w, assets/hero.jpg 1597w"
       imagesizes="100vw" fetchpriority="high" />
 
-<link rel="stylesheet" href="assets/style.css?v=10" />
+<link rel="stylesheet" href="assets/style.css?v=11" />
 
 <!-- No-JS fallback: if scripts don't run, lift the opening film, unlock scroll,
      and reveal all content so the site is never trapped behind the gate. -->
@@ -69,9 +75,9 @@
      object-fit:cover fills the screen top-to-bottom on every size. -->
 <div class="gate" id="gate" role="dialog" aria-modal="true" aria-label="Your invitation">
   <video class="gate__video" id="gateVideo" playsinline muted preload="auto"
-         poster="assets/opening-poster.jpg?v=10" aria-hidden="true">
-    <source src="assets/opening.webm?v=10" type="video/webm" />
-    <source src="assets/opening.mp4?v=10" type="video/mp4" />
+         poster="assets/opening-poster.jpg?v=11" aria-hidden="true">
+    <source src="assets/opening.webm?v=11" type="video/webm" />
+    <source src="assets/opening.mp4?v=11" type="video/mp4" />
   </video>
   <p class="gate__hint" id="gateHint">Tap to open</p>
 </div>
