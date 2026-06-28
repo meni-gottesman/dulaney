@@ -39,16 +39,6 @@
   --hero-photo: url("hero.jpg");
 }
 @media (max-width: 760px) { :root { --hero-photo: url("hero-m.jpg"); } }
-/* On a tall phone the landscape opening film is cropped tight by object-fit:cover
-   (the seal dominates). Show more of the envelope — a touch zoomed out — by fitting
-   the whole frame and scaling it up just enough to keep the white matte minimal;
-   the matte melts into the film's white bloom. */
-@media (max-width: 760px) {
-  .gate .gate__video { object-fit: contain; transform: scale(var(--gate-zoom, 2.3)); transform-origin: center; }
-  /* The film is matted in white on phones (so the whole envelope shows); drop the
-     hint down onto the navy envelope (below the white matte) where the light text reads. */
-  .gate .gate__hint { top: 37%; }
-}
 
 /* A wedding invitation is a fixed identity — it should look the same in every
    guest’s hand. A single dark identity (no light/dark toggle), warm and editorial. */
@@ -161,6 +151,7 @@ button { font-family: inherit; cursor: pointer; }
 .gate__video {
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: cover; object-position: 50% 50%; background: #ffffff;
+  transform: scaleY(1.1); /* gentle vertical stretch on the opening film */
 }
 .gate.is-open { opacity: 0; visibility: hidden; pointer-events: none; }
 .gate.is-instant, .gate.is-instant * { transition: none !important; }
@@ -189,6 +180,30 @@ button { font-family: inherit; cursor: pointer; }
    on load), so the reveal is a soft brightening rather than a hard cut. ---- */
 main, .closing, .colophon, .site-header { opacity: 0; transition: opacity 1.5s ease .12s; }
 body.entered main, body.entered .closing, body.entered .colophon, body.entered .site-header { opacity: 1; }
+
+/* ============================================================================
+   PRIVATE ACCESS GATE (password screen — sits above everything)
+   ========================================================================== */
+.lockscreen {
+  position: fixed; inset: 0; z-index: 500;
+  background: var(--bg);
+  display: grid; place-items: center;
+  padding: clamp(1.5rem, 6vw, 4rem);
+  overflow-y: auto;
+}
+.lockscreen__inner { width: 100%; max-width: 30rem; text-align: center; margin: auto; }
+.lockscreen__eyebrow { font-family: var(--font-sans); text-transform: uppercase; letter-spacing: 0.34em; text-indent: 0.34em; font-size: 0.72rem; color: var(--accent); margin: 0 0 1rem; }
+.lockscreen__title { font-size: clamp(2.4rem, 9vw, 3.6rem); color: var(--fg); margin: 0 0 2rem; }
+.lockscreen__form { display: grid; gap: 0.9rem; }
+.lockscreen__label { font-family: var(--font-sans); text-transform: uppercase; letter-spacing: 0.22em; font-size: 0.68rem; color: var(--muted-fg); }
+.lockscreen__input { font-family: var(--font-display); font-size: 1.3rem; text-align: center; color: var(--fg); background: var(--soft); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.85rem 1rem; width: 100%; }
+.lockscreen__input:focus { border-color: var(--accent); outline: none; }
+.lockscreen__btn { justify-self: center; margin-top: 0.4rem; font-family: var(--font-sans); text-transform: uppercase; letter-spacing: 0.28em; font-size: 0.74rem; background: var(--ivory); color: var(--ink); border: 1px solid var(--ivory); padding: 0.95rem 2.6rem; border-radius: 999px; transition: transform .25s ease, background .25s ease, color .25s ease, border-color .25s ease; }
+.lockscreen__btn:hover:not(:disabled) { transform: translateY(-2px); background: var(--accent); border-color: var(--accent); }
+.lockscreen__btn:disabled { opacity: 0.5; cursor: default; }
+.lockscreen__error { min-height: 1.2em; margin: 0.2rem 0 0; font-family: var(--font-sans); font-size: 0.85rem; color: #d98a8a; }
+.lockscreen__legal { margin: 2.4rem auto 0; max-width: 34ch; font-family: var(--font-sans); font-size: 0.78rem; line-height: 1.6; color: var(--muted-fg); }
+.lockscreen__legal strong { color: color-mix(in oklch, var(--fg) 82%, transparent); font-weight: 500; }
 
 /* ============================================================================
    DRESS CODE — the "your best in black" statement
