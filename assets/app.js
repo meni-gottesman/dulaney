@@ -45,15 +45,8 @@
       if (t) t.focus({ preventScroll: true });
     };
 
-    // film's own audio on the tap → crossfade into the looping track
-    function startOpeningAudio() {
-      var want = "on";
-      try { want = localStorage.getItem("nevis_audio") || "on"; } catch (e) {}
-      if (want === "off") { setAudioUI(false); return; }
-      if (hasRealTrack) playLoop();  // the film is muted; play ONLY the looping music (reliable on iOS)
-      isOn = true; setAudioUI(true);
-      try { localStorage.setItem("nevis_audio", "on"); } catch (e) {}
-    }
+    // The opening film is SILENT — ambient audio is currently disabled, so the
+    // gate never touches the (now removed) audio machinery.
 
     let returning = false;
     try { returning = sessionStorage.getItem("nevis_entered") === "1"; } catch (e) {}
@@ -62,9 +55,9 @@
       gate.classList.add("is-instant");
       exitGate();
     } else if (prefersReduced) {
-      // honour reduced motion: hold on the sealed poster, enter on tap
+      // honour reduced motion: hold on the sealed poster, enter straight on tap
       lockBackground(gate);
-      gate.addEventListener("click", function () { startAudio(); exitGate(); });
+      gate.addEventListener("click", exitGate);
     } else {
       lockBackground(gate);
       let clicked = false;
@@ -74,14 +67,9 @@
         if (p && p.catch) p.catch(function () {});
       };
       gateVideo.addEventListener("playing", function () { gate.classList.add("is-playing"); });
-      gateVideo.addEventListener("ended", function () {
-        // line the song's swell up with the reveal: if the audio is still in the
-        // envelope/quiet part when the film ends, jump it to the swell-in point.
-        try { if (audioEl && hasRealTrack && !audioEl.paused && audioEl.currentTime < SONG_FADE_START) audioEl.currentTime = SONG_FADE_START; } catch (e) {}
-        exitGate();
-      });
+      gateVideo.addEventListener("ended", exitGate);
       gateVideo.addEventListener("error", function () { if (clicked) window.setTimeout(exitGate, 400); });
-      gate.addEventListener("click", function () { if (!opened && !clicked) { clicked = true; startOpeningAudio(); playFilm(); } });
+      gate.addEventListener("click", function () { if (!opened && !clicked) { clicked = true; playFilm(); } });
     }
   } else {
     // No gate on this page — show content immediately.
@@ -697,7 +685,7 @@
         if (!guests.length) { glCount.innerHTML = "&nbsp;"; glEmpty.hidden = false; return; }
         glEmpty.hidden = true;
         const total = guests.reduce((s, g) => s + (Number(g.party) || 1), 0);
-        glCount.textContent = total + (total === 1 ? " coming, so far" : " coming, so far");
+        glCount.textContent = total + " coming, so far";
         guests.forEach((g) => {
           const li = document.createElement("li");
           li.className = "guestlist__item";
@@ -740,10 +728,11 @@
           .catch(function () { adminSummary.textContent = "That image didn’t work — please try another."; });
       });
 
-      const openAdmin = () => { admin.hidden = false; body.classList.add("menu-open"); $("#adminPw").focus(); };
-      const closeAdmin = () => { admin.hidden = true; body.classList.remove("menu-open"); if (location.hash === "#admin") history.replaceState(null, "", location.pathname + location.search); };
+      const openAdmin = () => { admin.hidden = false; body.classList.add("menu-open"); lockBackground(admin); $("#adminPw").focus(); };
+      const closeAdmin = () => { admin.hidden = true; body.classList.remove("menu-open"); unlockBackground(); if (location.hash === "#admin") history.replaceState(null, "", location.pathname + location.search); };
       const hostsLink = $("#hostsLink"); if (hostsLink) hostsLink.addEventListener("click", (e) => { e.preventDefault(); openAdmin(); });
       const adminCloseBtn = $("#adminClose"); if (adminCloseBtn) adminCloseBtn.addEventListener("click", closeAdmin);
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !admin.hidden) { closeAdmin(); if (hostsLink) hostsLink.focus(); } });
       if (location.hash === "#admin") openAdmin();
 
       adminGate.addEventListener("submit", (e) => {

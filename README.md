@@ -14,14 +14,14 @@ to point that domain here.
 > (name order, the exact ceremony day, the day‑by‑day itinerary) are flagged at the
 > bottom — please confirm them.
 
-It reuses the theme and content from your Lovable "Nevis Affair" project (warm
-ivory/ink palette with a quiet **Caribbean‑blue** accent, Cormorant Garamond + Jost,
-quiet‑luxury editorial layout) with one restrained signature gesture from the
+It reuses the content from your Lovable "Nevis Affair" project in a **single dark
+theme** (deep warm near‑black, warm‑ivory type, a brightened ocean/turquoise accent,
+Cormorant Garamond + Jost, quiet‑luxury editorial layout) with one restrained gesture from the
 reference site — the envelope opening:
 
-- ✉️ **Opening film** — a **full‑screen** takeover of the couple's cream handmade‑paper
-  envelope, sealed with a red **"J&M" wax heart**. It **plays only when tapped** (poster +
-  "Tap to open" until then), **with its own letter‑opening sound**; the envelope opens,
+- ✉️ **Opening film** — a **full‑screen** takeover of the couple's **navy** handmade‑paper
+  envelope, sealed with a **bronze "J&M" wax heart**. It **plays only when tapped** (poster +
+  "Tap to open" until then), **silently** (ambient audio is currently disabled); the envelope opens,
   warm light blooms, the frame **whites out**, and the **site fades in from white** while
   the sound **crossfades into the looping music**. `object-fit: cover` fills the screen
   top‑to‑bottom on every size (desktop sees the whole envelope; phones fill with the seal).
@@ -37,8 +37,8 @@ reference site — the envelope opening:
   any time via the control bottom‑right; a guest's choice is remembered across visits
 - 📜 Scroll reveals, editorial **itinerary**, full **RSVP**
 
-The palette is locked to a single light identity (no surprise dark mode), so the site
-looks the same in every guest's hand and matches the printed invitation.
+The palette is locked to a single dark identity (no light/dark toggle), so the site
+looks the same in every guest's hand.
 
 ### Structure — three pages, shared styling
 A minimal home, with the details on their own pages (no build step; only Google Fonts
@@ -198,6 +198,6 @@ to be `reservations.nev@fourseasons.com`.
 | `--palm` | `0.45 0.05 152` | accent |
 
 Fonts: **Cormorant Garamond** (display) + **Jost** (labels/UI). Corners are square
-(`--radius: 0`) for a crisp, editorial feel. The palette is **locked to one light
-identity** — no dark mode — so the site looks the same in every guest's hand and
-matches the printed invitation. Mobile‑first and `prefers-reduced-motion` are honoured.
+(`--radius: 0`) for a crisp, editorial feel. The palette is **locked to one dark
+identity** — no light/dark toggle — so the site looks the same in every guest's hand.
+Mobile‑first and `prefers-reduced-motion` are honoured.
