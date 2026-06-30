@@ -62,12 +62,21 @@
 </style></noscript>
 </head>
 
-<body>
+<body class="is-sealed">
 
-<!-- TEMPORARILY DISABLED: the opening envelope film (#gate) + ambient audio
-     (audio-toggle + <audio>) are removed for now, so the site loads straight to
-     the hero. The opening.* and ambient.mp3 assets remain in /assets — restore
-     this block (and the access gate) from git to re-enable. -->
+<!-- ====================== ENTRY GATE (the opening film) ====================== -->
+<!-- The couple's navy "J&M" wax-seal envelope: plays on tap, opens and blooms to
+     white, then the site fades in from white. object-fit:cover fills every screen.
+     (Ambient audio is intentionally off for now — re-add the <audio> + toggle to
+     bring it back.) -->
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-label="Your invitation">
+  <video class="gate__video" id="gateVideo" playsinline muted preload="auto"
+         poster="assets/opening-poster.jpg?v=12" aria-hidden="true">
+    <source src="assets/opening.webm?v=12" type="video/webm" />
+    <source src="assets/opening.mp4?v=12" type="video/mp4" />
+  </video>
+  <p class="gate__hint" id="gateHint">Tap to open</p>
+</div>
 
 <!-- ====================== HEADER ====================== -->
 <header class="site-header on-hero" id="header">
