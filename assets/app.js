@@ -45,8 +45,16 @@
       if (t) t.focus({ preventScroll: true });
     };
 
-    // The opening film is SILENT — ambient audio is currently disabled, so the
-    // gate never touches the (now removed) audio machinery.
+    // The film's ambient score starts on the same tap that plays the film (the
+    // film itself is muted; we play the <audio> element — reliable on iOS).
+    function startOpeningAudio() {
+      var want = "on";
+      try { want = localStorage.getItem("nevis_audio") || "on"; } catch (e) {}
+      if (want === "off") { setAudioUI(false); return; }
+      if (hasRealTrack) playLoop();
+      isOn = true; setAudioUI(true);
+      try { localStorage.setItem("nevis_audio", "on"); } catch (e) {}
+    }
 
     let returning = false;
     try { returning = sessionStorage.getItem("nevis_entered") === "1"; } catch (e) {}
@@ -55,9 +63,9 @@
       gate.classList.add("is-instant");
       exitGate();
     } else if (prefersReduced) {
-      // honour reduced motion: hold on the sealed poster, enter straight on tap
+      // honour reduced motion: hold on the sealed poster, enter on tap
       lockBackground(gate);
-      gate.addEventListener("click", exitGate);
+      gate.addEventListener("click", function () { startOpeningAudio(); exitGate(); });
     } else {
       lockBackground(gate);
       let clicked = false;
@@ -67,9 +75,14 @@
         if (p && p.catch) p.catch(function () {});
       };
       gateVideo.addEventListener("playing", function () { gate.classList.add("is-playing"); });
-      gateVideo.addEventListener("ended", exitGate);
+      gateVideo.addEventListener("ended", function () {
+        // Align the song's swell with the reveal: if the audio is still in the
+        // envelope/quiet part when the (shorter) film ends, jump to the swell-in point.
+        try { if (audioEl && hasRealTrack && !audioEl.paused && audioEl.currentTime < SONG_FADE_START) audioEl.currentTime = SONG_FADE_START; } catch (e) {}
+        exitGate();
+      });
       gateVideo.addEventListener("error", function () { if (clicked) window.setTimeout(exitGate, 400); });
-      gate.addEventListener("click", function () { if (!opened && !clicked) { clicked = true; playFilm(); } });
+      gate.addEventListener("click", function () { if (!opened && !clicked) { clicked = true; startOpeningAudio(); playFilm(); } });
     }
   } else {
     // No gate on this page — show content immediately.

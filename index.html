@@ -44,7 +44,7 @@
       imagesrcset="assets/hero-m.jpg 932w, assets/hero.jpg 1597w"
       imagesizes="100vw" fetchpriority="high" />
 
-<link rel="stylesheet" href="assets/style.css?v=13" />
+<link rel="stylesheet" href="assets/style.css?v=14" />
 
 <!-- No-JS fallback: if scripts don't run, lift the opening film, unlock scroll,
      and reveal all content so the site is never trapped behind the gate. -->
@@ -65,10 +65,9 @@
 <body class="is-sealed">
 
 <!-- ====================== ENTRY GATE (the opening film) ====================== -->
-<!-- The couple's navy "J&M" wax-seal envelope: plays on tap, opens and blooms to
-     white, then the site fades in from white. object-fit:cover fills every screen.
-     (Ambient audio is intentionally off for now — re-add the <audio> + toggle to
-     bring it back.) -->
+<!-- The couple's navy "J&M" wax-seal envelope: plays on tap (with its ambient
+     score), opens and blooms to white, then the site fades in from white.
+     object-fit:cover fills every screen. -->
 <div class="gate" id="gate" role="dialog" aria-modal="true" aria-label="Your invitation">
   <video class="gate__video" id="gateVideo" playsinline muted preload="auto"
          poster="assets/opening-poster.jpg?v=12" aria-hidden="true">
@@ -77,6 +76,17 @@
   </video>
   <p class="gate__hint" id="gateHint">Tap to open</p>
 </div>
+
+<!-- ====================== AUDIO ======================
+     Plays on the opening tap: a letter-opening sound → the song swells in as the
+     site reveals from white, then plays through and fades. On by default; mutable
+     bottom-right; pauses when the guest leaves/backgrounds the site. -->
+<button class="audio-toggle is-muted" id="audioToggle" aria-pressed="false" aria-label="Play ambient sound">
+  <span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+</button>
+<audio id="audioEl" preload="metadata">
+  <source src="assets/ambient.mp3?v=14" type="audio/mpeg" />
+</audio>
 
 <!-- ====================== HEADER ====================== -->
 <header class="site-header on-hero" id="header">
@@ -316,6 +326,6 @@
   </div>
 </section>
 
-<script src="assets/app.js?v=13"></script>
+<script src="assets/app.js?v=14"></script>
 </body>
 </html>
