@@ -176,10 +176,13 @@ exposed in the page.
 > lands in the Sheet.
 
 ### 7. Contacts & deadlines (already wired)
-Stay section: room block held under **“Dempsey–Dulaney Celebration”**; reservations
-**(869) 469-1111** and **reservations.nev@fourseason.com** (both tappable). Travel
-section: flight assistance **Brett Lafleur** (number to follow). RSVP deadlines:
-reply by **August 1**, room-block deposit by **September 5**, balance by **February 1, 2027**.
+Stay section: room block held under **“Dempsey–Dulaney Celebration”**; full rates
+(Ocean View Suite $525/night, transfers $180/pp, all-inclusive F&B $390/pp/day);
+reservations **(869) 469-1111** and **reservations.nev@fourseason.com** (both tappable);
+resort brochure PDF + resort site linked. Travel section: flight assistance
+**Brett Lafleur** (blafleur3386@gmail.com); travel insurance via **Lynn Vosloo**
+(lvosloo@expediacruises.com · (877) 781-7447). RSVP deadlines:
+reply by **August 16**, room-block deposit by **September 13**, balance by **February 1, 2027**.
 Update these if they change. ⚠️ Confirm the resort email — it’s wired verbatim as
 `reservations.nev@fourseason.com` (singular “fourseason”); double-check it isn’t meant
 to be `reservations.nev@fourseasons.com`.
