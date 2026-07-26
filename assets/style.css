@@ -787,7 +787,10 @@ body.entered .hero__date { opacity: 1; transform: translateY(0); }
 .closing__body { font-family: var(--font-display); font-style: italic; font-size: clamp(1.2rem, 2.5vw, 1.8rem); margin-top: 1.2rem; color: color-mix(in oklch, var(--ivory) 88%, transparent); }
 .closing__mono { margin-top: clamp(2.5rem, 6vw, 4rem); font-family: var(--font-display); font-size: 2rem; letter-spacing: 0.2em; }
 .closing__meta { margin-top: 0.8rem; font-family: var(--font-sans); text-transform: uppercase; letter-spacing: 0.22em; font-size: 0.66rem; line-height: 2; color: color-mix(in oklch, var(--ivory) 72%, transparent); }
-.colophon { padding: 1.6rem var(--gutter); text-align: center; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.24em; color: var(--muted-fg); }
+.colophon { padding: 1.6rem var(--gutter) 0.5rem; text-align: center; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.24em; color: var(--muted-fg); }
+/* Music credit — Brendan Mills gave permission for his cover. Delete this rule
+   and the <p class="credit"> in index.html together if it's ever not wanted. */
+.credit { padding: 0 var(--gutter) 1.6rem; text-align: center; font-size: 0.56rem; text-transform: uppercase; letter-spacing: 0.2em; color: color-mix(in oklch, var(--muted-fg) 70%, transparent); margin: 0; }
 
 /* ============================================================================
    SCROLL REVEAL

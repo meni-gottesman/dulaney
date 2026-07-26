@@ -32,9 +32,10 @@ reference site — the envelope opening:
   under three wax‑heart scratch‑offs (or press Enter); all three open a live **countdown**
 - 🖼️ **Engagement gallery** — an editorial masonry with a tap‑to‑enlarge **lightbox**
   (swipe / arrows / keyboard)
-- 🔊 **Ambient music** — `assets/ambient.mp3` (a looping romantic Italian melody) is **on
-  by default**: the film's letter‑opening sound crossfades into it on the open‑tap. Mute
-  any time via the control bottom‑right; a guest's choice is remembered across visits
+- 🔊 **Ambient music** — `assets/ambient.mp3` is **on by default**: the film's real
+  envelope‑opening sound crossfades into the song on the open‑tap, plays once, and ends
+  on the song's own fade‑out. Mute any time via the control bottom‑right; a guest's
+  choice is remembered across visits
 - 📜 Scroll reveals, editorial **itinerary**, full **RSVP**
 
 The palette is locked to a single dark identity (no light/dark toggle), so the site
@@ -134,16 +135,31 @@ remain untouched in your `Dulaney Engagement.zip`.
 
 ### 4. Ambient music + the film's own sound
 Two audio layers, crossfaded:
-- The **opening film keeps its own letter‑opening sound** (the gate `<video>` is no longer
-  muted; it's played on the tap at ~0.5 volume).
-- **`assets/ambient.mp3`** (a looping romantic Italian melody, *Amore al Mare*, 128 kbps) is
-  the ongoing ambient track, wired into `<audio id="audioEl">`.
+- The gate `<video>` is **muted**. iOS grants audio to only one element per gesture, so
+  everything you hear comes from the single `<audio id="audioEl">`.
+- **`assets/ambient.mp3`** (3:18) is one baked file: the film's own recorded
+  envelope‑opening sound (0–5 s) **crossfades** (5–7 s) into *"Just the Two of Us"*,
+  saxophone cover by **Brendan Mills**, used with his permission. The song runs to its
+  own composed fade‑out; there is **no loop**.
 
-On the open‑tap the film's sound plays and the melody is primed silently; ~1.8 s before the
-film ends the film audio fades down while the melody fades up (a smooth **crossfade**), and
-the melody loops as the site reveals. It's **on by default**; the control bottom‑right
-mutes/unmutes and the choice is remembered. To swap either, replace `assets/ambient.mp3`
-(loop) or re‑encode the opening film. To make audio **off by default**, change
+The crossfade is timed so the sax is swelling exactly as the 7 s film blooms to white and
+the site reveals (`SONG_FADE_START = 5.4` in `app.js` snaps the audio there if it drifts).
+It's **on by default**; the control bottom‑right mutes/unmutes and the choice is
+remembered; playback pauses when the guest leaves the tab.
+
+**To swap the song**, rebuild the file — foley from the opening film, crossfaded into the
+new track, both loudness‑matched:
+
+```
+ffmpeg -t 7.0 -i opening-source.mp4 -vn -c:a pcm_s16le foley.wav
+ffmpeg -i foley.wav -ss <song-start> -i new-song.mp3 \
+  -filter_complex "[0:a]loudnorm=I=-20:TP=-2:LRA=11,aresample=44100[v];\
+                   [1:a]loudnorm=I=-20:TP=-2:LRA=11,aresample=44100[s];\
+                   [v][s]acrossfade=d=2.0:c1=tri:c2=tri[a]" \
+  -map "[a]" -c:a libmp3lame -q:a 5 assets/ambient.mp3
+```
+
+Then bump `ambient.mp3?v=N` in `index.html`. To make audio **off by default**, change
 `let want = "on"` / `let pref = "on"` to `"off"` in `assets/app.js`.
 
 ### 5. Registry links — still placeholders ⚠️
