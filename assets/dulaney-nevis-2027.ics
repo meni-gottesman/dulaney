@@ -1,0 +1,94 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//The Dulaney Wedding//Nevis 2027//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Jaden & McKenna — Nevis 2027
+BEGIN:VTIMEZONE
+TZID:America/St_Kitts
+BEGIN:STANDARD
+DTSTART:19700101T000000
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0400
+TZNAME:AST
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:weekend-2027@destinationdulaney.com
+DTSTAMP:20260711T120000Z
+DTSTART;VALUE=DATE:20270506
+DTEND;VALUE=DATE:20270511
+SUMMARY:Jaden & McKenna's Wedding — Nevis
+DESCRIPTION:The Dulaney wedding at the Four Seasons Resort Nevis.\nArrive T
+ hursday May 6 (check-in 3:00 PM) — depart Monday May 10 (check-out noon)
+ .\nFly into St. Kitts (SKB). US passport required.\nAll the details: https
+ ://destinationdulaney.com/
+URL:https://destinationdulaney.com/
+TRANSP:TRANSPARENT
+LOCATION:Four Seasons Resort Nevis\, Pinney's Beach\, Charlestown\, Nevis\,
+  West Indies
+END:VEVENT
+BEGIN:VEVENT
+UID:ceremony-2027@destinationdulaney.com
+DTSTAMP:20260711T120000Z
+DTSTART;TZID=America/St_Kitts:20270507T170000
+DTEND;TZID=America/St_Kitts:20270507T220000
+SUMMARY:The Ceremony — Jaden & McKenna
+DESCRIPTION:Vows on the Oceanfront 18th Lawn\, with cocktails and dinner to
+  follow.\nDress: your best in black evening wear.\nhttps://destinationdula
+ ney.com/
+URL:https://destinationdulaney.com/
+TRANSP:OPAQUE
+LOCATION:Oceanfront 18th Lawn\, Four Seasons Resort Nevis\, Pinney's Beach\
+ , Charlestown\, Nevis\, West Indies
+END:VEVENT
+BEGIN:VEVENT
+UID:rsvp-by@destinationdulaney.com
+DTSTAMP:20260711T120000Z
+DTSTART;VALUE=DATE:20260901
+DTEND;VALUE=DATE:20260902
+SUMMARY:RSVP by today — Dulaney wedding
+DESCRIPTION:Kindly send your reply to Jaden & McKenna today.\nhttps://desti
+ nationdulaney.com/
+URL:https://destinationdulaney.com/
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P7D
+DESCRIPTION:RSVP by today — Dulaney wedding
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:deposit-due@destinationdulaney.com
+DTSTAMP:20260711T120000Z
+DTSTART;VALUE=DATE:20261101
+DTEND;VALUE=DATE:20261102
+SUMMARY:Room deposit due — Dulaney wedding
+DESCRIPTION:Deposit due to hold your room in the Dempsey–Dulaney Celebrat
+ ion block.\nFour Seasons Nevis reservations: (869) 469-1111.\nhttps://dest
+ inationdulaney.com/
+URL:https://destinationdulaney.com/
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P7D
+DESCRIPTION:Room deposit due — Dulaney wedding
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:balance-due@destinationdulaney.com
+DTSTAMP:20260711T120000Z
+DTSTART;VALUE=DATE:20270201
+DTEND;VALUE=DATE:20270202
+SUMMARY:Room balance due — Dulaney wedding
+DESCRIPTION:Balance due in full for the Four Seasons Nevis room block.\nhtt
+ ps://destinationdulaney.com/
+URL:https://destinationdulaney.com/
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P7D
+DESCRIPTION:Room balance due — Dulaney wedding
+END:VALARM
+END:VEVENT
+END:VCALENDAR
