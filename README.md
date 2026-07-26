@@ -182,7 +182,9 @@ reservations **(869) 469-1111** and **reservations.nev@fourseason.com** (both ta
 resort brochure PDF + resort site linked. Travel section: flight assistance
 **Brett Lafleur** (blafleur3386@gmail.com); travel insurance via **Lynn Vosloo**
 (lvosloo@expediacruises.com · (877) 781-7447). RSVP deadlines:
-reply by **August 16**, room-block deposit by **September 13**, balance by **February 1, 2027**.
+reply by **September 1**, room-block deposit by **November 1**, balance by **February 1, 2027**.
+These dates also live in `assets/dulaney-nevis-2027.ics` (the guest "add to calendar" file) —
+after changing any of them, re-run `python3 tools/make_ics.py` to regenerate it.
 Update these if they change. ⚠️ Confirm the resort email — it’s wired verbatim as
 `reservations.nev@fourseason.com` (singular “fourseason”); double-check it isn’t meant
 to be `reservations.nev@fourseasons.com`.

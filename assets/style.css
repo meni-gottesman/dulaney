@@ -848,6 +848,19 @@ body.entered .hero__date { opacity: 1; transform: translateY(0); }
 .pagefoot__nav a:hover { color: var(--accent); }
 .pagefoot__meta { font-family: var(--font-sans); text-transform: uppercase; letter-spacing: 0.26em; font-size: 0.58rem; color: var(--muted-fg); margin: 0; }
 @media print { .pagefoot { border: 0; } }
+/* Add to calendar — save-the-date block and the itinerary. */
+.savedate__cal { margin: clamp(2.4rem, 5.5vw, 3.2rem) 0 0; }
+.savedate__cal-note { margin: 0 0 1.1rem; font-size: 0.95rem; color: var(--charcoal); }
+.savedate__cal-links { margin: 0; display: flex; flex-wrap: wrap; gap: 1rem 1.8rem; justify-content: center; }
+.cal-link {
+  font-family: var(--font-sans); text-transform: uppercase; letter-spacing: 0.24em;
+  font-size: 0.62rem; text-decoration: none; color: var(--accent);
+  border-bottom: 1px solid var(--border); padding-bottom: 0.45rem;
+  transition: border-color .3s ease;
+}
+.cal-link:hover { border-color: var(--accent); }
+.itinerary__cal { margin: clamp(2.4rem, 5vw, 3.2rem) 0 0; }
+
 .savedate__more { margin: clamp(2.6rem, 6vw, 3.6rem) 0 0; }
 .savedate__more a {
   font-family: var(--font-sans); text-transform: uppercase; letter-spacing: 0.3em;
