@@ -5,7 +5,7 @@ A cinematic, editorial wedding website for an intimate destination wedding at th
 Built to reflect the printed invitation: *Bon Voyage · For a select few*.
 
 ### 🌐 Live
-**https://meni-gottesman.github.io/dulaney/**
+**https://destinationdulaney.com/**
 Source repo: `github.com/meni-gottesman/dulaney` (GitHub Pages, `main` branch).
 The printed invitation lists **www.dulaneys.com** — see *Connecting dulaneys.com* below
 to point that domain here.
@@ -83,7 +83,7 @@ cd nevis-affair
 git add -A && git commit -m "update" && git push
 ```
 
-GitHub rebuilds in ~1 minute → https://meni-gottesman.github.io/dulaney/
+GitHub rebuilds in ~1 minute → https://destinationdulaney.com/
 
 ### Connecting dulaneys.com (the URL on the invitation)
 1. In the repo → **Settings → Pages → Custom domain**, enter `www.dulaneys.com` (or `dulaneys.com`) and save. (This writes a `CNAME` file.)
@@ -162,7 +162,7 @@ ffmpeg -i foley.wav -ss <song-start> -i new-song.mp3 \
 Then bump `ambient.mp3?v=N` in `index.html`. To make audio **off by default**, change
 `let want = "on"` / `let pref = "on"` to `"off"` in `assets/app.js`.
 
-### 5. Registry links — still placeholders ⚠️
+### 5. Registry — LIVE ✅
 The invitation didn't include registry info, so the two **Registry** links point at
 `#registry` (a harmless no‑op). Replace them with real URLs when ready, or remove the
 section. (Marked `SWAP:` in the code.)
@@ -194,16 +194,15 @@ exposed in the page.
 ### 7. Contacts & deadlines (already wired)
 Stay section: room block held under **“Dempsey–Dulaney Celebration”**; full rates
 (Ocean View Suite $525/night, transfers $180/pp, all-inclusive F&B $390/pp/day);
-reservations **(869) 469-1111** and **reservations.nev@fourseason.com** (both tappable);
+reservations **(869) 469-1111** and **reservations.nev@fourseasons.com** (both tappable);
 resort brochure PDF + resort site linked. Travel section: flight assistance
 **Brett Lafleur** (blafleur3386@gmail.com); travel insurance via **Lynn Vosloo**
 (lvosloo@expediacruises.com · (877) 781-7447). RSVP deadlines:
 reply by **September 1**, room-block deposit by **November 1**, balance by **February 1, 2027**.
 These dates also live in `assets/dulaney-nevis-2027.ics` (the guest "add to calendar" file) —
 after changing any of them, re-run `python3 tools/make_ics.py` to regenerate it.
-Update these if they change. ⚠️ Confirm the resort email — it’s wired verbatim as
-`reservations.nev@fourseason.com` (singular “fourseason”); double-check it isn’t meant
-to be `reservations.nev@fourseasons.com`.
+Update these if they change. The resort email is `reservations.nev@fourseasons.com`, confirmed against page 26 of the
+Four Seasons brochure hosted at `assets/fs-nevis-brochure-2026.pdf`.
 
 ---
 
