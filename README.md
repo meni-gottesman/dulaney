@@ -5,10 +5,20 @@ A cinematic, editorial wedding website for an intimate destination wedding at th
 Built to reflect the printed invitation: *Bon Voyage · For a select few*.
 
 ### 🌐 Live
-**https://destinationdulaney.com/**
+**https://destinationdulaney.com/** — Namecheap domain → GitHub Pages, free Let's Encrypt
+SSL, `www` and `http` both redirect to the canonical https apex.
 Source repo: `github.com/meni-gottesman/dulaney` (GitHub Pages, `main` branch).
-The printed invitation lists **www.dulaneys.com** — see *Connecting dulaneys.com* below
-to point that domain here.
+
+> ⚠️ **The URL printed on the invitation must be `destinationdulaney.com`.**
+> An early draft of this README assumed *dulaneys.com*. That domain belongs to an
+> unrelated third party (registered 2004, GoDaddy) and serves someone else's live
+> site — anything printed with it would send guests to a stranger.
+
+> ⚠️ **Keep the registrant email verified.** ICANN requires the registrant contact on a
+> new domain to be confirmed within 15 days. It lapsed once (2026‑07‑26) and Namecheap
+> suspended DNS: every URL went dark, including the github.io fallback. Clicking the
+> verification link in Namecheap's email restored it within minutes. Watch for those
+> emails, especially around renewal.
 
 > Details on this site are taken from the invitation. A couple of inferred items
 > (name order, the exact ceremony day, the day‑by‑day itinerary) are flagged at the
@@ -85,11 +95,11 @@ git add -A && git commit -m "update" && git push
 
 GitHub rebuilds in ~1 minute → https://destinationdulaney.com/
 
-### Connecting dulaneys.com (the URL on the invitation)
-1. In the repo → **Settings → Pages → Custom domain**, enter `www.dulaneys.com` (or `dulaneys.com`) and save. (This writes a `CNAME` file.)
+### The custom domain (done — 2026-07-11)
+1. Repo → **Settings → Pages → Custom domain** = `destinationdulaney.com` (writes `CNAME`). ✅ done
 2. At your domain registrar, add DNS:
    - `www` → **CNAME** → `meni-gottesman.github.io`
-   - apex `dulaneys.com` → four **A** records: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
+   - apex `destinationdulaney.com` → four **A** records: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
 3. Back in Pages, tick **Enforce HTTPS** once the cert issues (a few minutes).
 
 ---
