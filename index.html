@@ -44,7 +44,7 @@
       imagesrcset="assets/hero-m.jpg 932w, assets/hero.jpg 1597w"
       imagesizes="100vw" fetchpriority="high" />
 
-<link rel="stylesheet" href="assets/style.css?v=17" />
+<link rel="stylesheet" href="assets/style.css?v=18" />
 
 <!-- No-JS fallback: if scripts don't run, lift the opening film, unlock scroll,
      and reveal all content so the site is never trapped behind the gate. -->
@@ -84,9 +84,14 @@
 <button class="audio-toggle is-muted" id="audioToggle" aria-pressed="false" aria-label="Play ambient sound">
   <span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
 </button>
-<audio id="audioEl" preload="metadata">
+<!-- The score plays through a <video> element, NOT <audio>: on iPhone an <audio>
+     element is silenced by the physical Ring/Silent switch, while a <video> is
+     not. It holds an audio-only file and is visually hidden at 1px — deliberately
+     NOT display:none, which iOS refuses to play. -->
+<video id="audioEl" class="audio-media" preload="metadata" playsinline
+       disablepictureinpicture aria-hidden="true" tabindex="-1">
   <source src="assets/ambient.mp3?v=17" type="audio/mpeg" />
-</audio>
+</video>
 
 <!-- ====================== HEADER ====================== -->
 <header class="site-header on-hero" id="header">
@@ -107,15 +112,15 @@
   </div>
   <div class="menu__nav">
     <a href="#top"><span class="idx">01</span>Home</a>
-    <a href="details.html"><span class="idx">02</span>Details</a>
-    <a href="details.html#itinerary"><span class="idx sub">&mdash;</span>Itinerary</a>
-    <a href="details.html#travel"><span class="idx sub">&mdash;</span>Travel</a>
-    <a href="details.html#stay"><span class="idx sub">&mdash;</span>Stay</a>
-    <a href="details.html#amenities"><span class="idx sub">&mdash;</span>Amenities</a>
-    <a href="details.html#dining"><span class="idx sub">&mdash;</span>Dining</a>
-    <a href="details.html#dress"><span class="idx sub">&mdash;</span>Dress</a>
-    <a href="details.html#registry"><span class="idx sub">&mdash;</span>Registry</a>
-    <a href="gallery.html"><span class="idx">03</span>Gallery</a>
+    <a href="/details/"><span class="idx">02</span>Details</a>
+    <a href="/details/#itinerary"><span class="idx sub">&mdash;</span>Itinerary</a>
+    <a href="/details/#travel"><span class="idx sub">&mdash;</span>Travel</a>
+    <a href="/details/#stay"><span class="idx sub">&mdash;</span>Stay</a>
+    <a href="/details/#amenities"><span class="idx sub">&mdash;</span>Amenities</a>
+    <a href="/details/#dining"><span class="idx sub">&mdash;</span>Dining</a>
+    <a href="/details/#dress"><span class="idx sub">&mdash;</span>Dress</a>
+    <a href="/details/#registry"><span class="idx sub">&mdash;</span>Registry</a>
+    <a href="/gallery/"><span class="idx">03</span>Gallery</a>
     <a href="#rsvp"><span class="idx">04</span>RSVP</a>
   </div>
   <div class="menu__foot">
@@ -181,16 +186,18 @@
 
     <!-- One .ics holds the weekend, the ceremony and the three reply dates
          (each with a week-prior reminder). Rebuild with tools/make_ics.py. -->
-    <div class="savedate__cal reveal d2">
-      <p class="savedate__cal-note">The weekend, the ceremony and the reply dates &mdash; in one tap.</p>
-      <p class="savedate__cal-links">
-        <a class="cal-link" href="assets/dulaney-nevis-2027.ics">Apple &amp; Outlook</a>
-        <a class="cal-link" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Jaden+%26+McKenna%27s+Wedding+%E2%80%94+Nevis&amp;dates=20270506%2F20270511&amp;details=The+Dulaney+wedding+at+the+Four+Seasons+Resort+Nevis.%0AArrive+Thu+May+6%2C+depart+Mon+May+10.+Fly+into+St.+Kitts+%28SKB%29.%0AAll+the+details%3A+https%3A%2F%2Fdestinationdulaney.com%2F&amp;location=Four+Seasons+Resort+Nevis%2C+Pinney%27s+Beach%2C+Charlestown%2C+Nevis%2C+West+Indies" target="_blank" rel="noopener">Google</a>
+    <div class="cal reveal d2">
+      <span class="cal__rule" aria-hidden="true"></span>
+      <p class="cal__lede">Keep the weekend close.</p>
+      <p class="cal__sub">The days in Nevis, the ceremony, and when to reply &mdash; set into your calendar in a single tap.</p>
+      <p class="cal__actions">
+        <a class="cal-btn" href="assets/dulaney-nevis-2027.ics">Apple &amp; Outlook</a>
+        <a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Jaden+%26+McKenna%27s+Wedding+%E2%80%94+Nevis&amp;dates=20270506%2F20270511&amp;details=The+Dulaney+wedding+at+the+Four+Seasons+Resort+Nevis.%0AArrive+Thu+May+6%2C+depart+Mon+May+10.+Fly+into+St.+Kitts+%28SKB%29.%0AAll+the+details%3A+https%3A%2F%2Fdestinationdulaney.com%2F&amp;location=Four+Seasons+Resort+Nevis%2C+Pinney%27s+Beach%2C+Charlestown%2C+Nevis%2C+West+Indies" target="_blank" rel="noopener">Google Calendar</a>
       </p>
     </div>
 
     <p class="savedate__more reveal d2">
-      <a href="details.html">The details &rarr;</a>
+      <a href="/details/">The details &rarr;</a>
     </p>
   </div>
 </section>
@@ -307,9 +314,11 @@
   </div>
 </footer>
 <p class="colophon">With love · Jaden &amp; McKenna <a href="#admin" class="hosts-link" id="hostsLink">Hosts</a></p>
-<!-- Courtesy credit — Brendan Mills shared his cover for this site. Remove this
-     line (and the .credit rule in style.css) if it isn't wanted. -->
-<p class="credit">Music &mdash; &ldquo;Just the Two of Us&rdquo; · sax cover by Brendan Mills, used with permission</p>
+<!-- Courtesy credit — Brendan Mills shared his cover for this site. -->
+<p class="credit">
+  Music &mdash; &ldquo;Just the Two of Us&rdquo; · sax cover by Brendan Mills<br />
+  Created by <a href="https://menigottesman.com" target="_blank" rel="noopener">Meni Gottesman</a>
+</p>
 
 <!-- ====================== HOSTS ADMIN (password-gated) ======================
      Opens on the "Hosts" link or the #admin URL. The password is checked
@@ -341,6 +350,6 @@
   </div>
 </section>
 
-<script src="assets/app.js?v=15"></script>
+<script src="assets/app.js?v=16"></script>
 </body>
 </html>

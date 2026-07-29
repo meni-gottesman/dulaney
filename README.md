@@ -58,8 +58,8 @@ over the network):
 | File | What's on it |
 |---|---|
 | `index.html` | **Home** — envelope gate → hero → Save‑the‑Date (scratch) → RSVP → closing |
-| `details.html` | Itinerary · Travel · Stay · Dress code · Registry |
-| `gallery.html` | Engagement photos + lightbox |
+| `details/index.html` (served at `/details/`) | Itinerary · Travel · Stay · Dress code · Registry |
+| `gallery/index.html` (served at `/gallery/`) | Engagement photos + lightbox |
 | `assets/style.css` | All styling (shared by every page) |
 | `assets/app.js` | All behaviour (gate, scratch, lightbox, RSVP… each guarded so it no‑ops where absent) |
 
@@ -110,7 +110,7 @@ All edits are plain HTML/CSS in `index.html`. Search for these markers:
 
 ### 1. Names, dates, copy, itinerary
 Text lives directly in each page. **`index.html`** holds the home copy — Hero,
-Save‑the‑Date (the scratch reveal), RSVP and the Closing. **`details.html`** holds
+Save‑the‑Date (the scratch reveal), RSVP and the Closing. **`details/index.html` (served at `/details/`)** holds
 Itinerary, Travel, Stay, Dress code and Registry. Edit in place. The ceremony
 countdown target lives in `assets/app.js`:
 ```js
