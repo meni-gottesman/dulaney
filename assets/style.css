@@ -301,6 +301,13 @@ body.menu-open .audio-toggle { opacity: 0; pointer-events: none; }
   mix-blend-mode: normal;
   transition: background .4s ease, color .4s ease, box-shadow .4s ease;
 }
+/* Added to the Home Screen, the site runs with no browser chrome at all and the
+   page extends under the clock (status-bar-style black-translucent). Push the
+   header below the notch so the wordmark never collides with it. */
+@media (display-mode: standalone) {
+  .site-header { padding-top: calc(clamp(1.1rem, 2.5vw, 1.8rem) + env(safe-area-inset-top)); }
+  .pagehead { padding-top: env(safe-area-inset-top); }
+}
 .site-header.on-hero { color: #f6eddc; }
 .site-header.scrolled {
   background: color-mix(in oklch, var(--bg) 86%, transparent);
