@@ -787,7 +787,12 @@
         $$("[data-toggle]", adminList).forEach((b) => b.addEventListener("click", () => {
           const id = b.getAttribute("data-toggle"), g = adminGuests.find((x) => x.id === id);
           const next = g.attending === "yes" ? "no" : "yes";
-          api.adminUpdate(adminPw, id, { attending: next, party: next === "yes" ? (g.party || 1) : 0 }).then(reload);
+          // Don't touch `party`. Zeroing it on decline meant that changing your mind
+          // came back as a party of 1 — a party of 3 silently lost two heads even
+          // though their companions were still on record. Counts already ignore
+          // anyone declined, so the stored number is safe to leave alone.
+          const restored = (g.companions && g.companions.length) ? 1 + g.companions.length : (g.party || 1);
+          api.adminUpdate(adminPw, id, next === "yes" ? { attending: next, party: restored } : { attending: next }).then(reload);
         }));
         $$("[data-remove]", adminList).forEach((b) => b.addEventListener("click", () => {
           const id = b.getAttribute("data-remove"), g = adminGuests.find((x) => x.id === id);
