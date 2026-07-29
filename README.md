@@ -177,6 +177,15 @@ The invitation didn't include registry info, so the two **Registry** links point
 `#registry` (a harmless no‑op). Replace them with real URLs when ready, or remove the
 section. (Marked `SWAP:` in the code.)
 
+> **STATUS: LIVE since 2026-07-28.** The Apps Script is deployed as a Web app
+> (Execute as: Me, Who has access: Anyone) and `RSVP_ENDPOINT` in `assets/app.js`
+> points at it, so replies land in the **"Dulaney Wedding - RSVPs"** Google Sheet
+> in menigottesman@gmail.com. The Hosts password lives ONLY in the deployed
+> script (this repo keeps the `CHANGE-ME` placeholder, since the repo is public).
+> To change the password: edit `ADMIN_PASSWORD` in the Apps Script, then
+> Deploy -> Manage deployments -> pencil -> Version: New -> Deploy.
+> The setup steps below are kept for reference / rebuilding from scratch.
+
 ### 6. RSVP — guest list + Hosts admin (Google Sheet backend)
 The RSVP lets guests reply, **say who's coming with them**, and see a public
 *"who's coming"* list. The couple get a **password‑protected Hosts panel** (the
