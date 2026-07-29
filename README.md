@@ -42,10 +42,10 @@ reference site — the envelope opening:
   under three wax‑heart scratch‑offs (or press Enter); all three open a live **countdown**
 - 🖼️ **Engagement gallery** — an editorial masonry with a tap‑to‑enlarge **lightbox**
   (swipe / arrows / keyboard)
-- 🔊 **Ambient music** — `assets/ambient.mp3` is **on by default**: the film's real
-  envelope‑opening sound crossfades into the song on the open‑tap, plays once, and ends
-  on the song's own fade‑out. Mute any time via the control bottom‑right; a guest's
-  choice is remembered across visits
+- 🔊 **A score, carried by the opening film itself** — **on by default**: the film's
+  own envelope‑opening sound crossfades into the song on the open‑tap, plays once
+  (1:05) and ends on a fade that lands on the song's own phrase break. Mute any time
+  via the control bottom‑right; a guest's choice is remembered across visits
 - 📜 Scroll reveals, editorial **itinerary**, full **RSVP**
 
 The palette is locked to a single dark identity (no light/dark toggle), so the site
@@ -145,32 +145,43 @@ remain untouched in your `Dulaney Engagement.zip`.
 
 ### 4. Ambient music + the film's own sound
 Two audio layers, crossfaded:
-- The gate `<video>` is **muted**. iOS grants audio to only one element per gesture, so
-  everything you hear comes from the single `<audio id="audioEl">`.
-- **`assets/ambient.mp3`** (3:18) is one baked file: the film's own recorded
-  envelope‑opening sound (0–5 s) **crossfades** (5–7 s) into *"Just the Two of Us"*,
-  saxophone cover by **Brendan Mills**, used with his permission. The song runs to its
-  own composed fade‑out; there is **no loop**.
+- **The score lives inside the opening film.** There is exactly ONE media element
+  with sound on the page: `#gateVideo`. `assets/ambient.mp3` no longer exists.
 
-The crossfade is timed so the sax is swelling exactly as the 7 s film blooms to white and
-the site reveals (`SONG_FADE_START = 5.4` in `app.js` snaps the audio there if it drifts).
-It's **on by default**; the control bottom‑right mutes/unmutes and the choice is
-remembered; playback pauses when the guest leaves the tab.
+Why: on iPhone a separate `<audio>` element is silenced by the physical Ring/Silent
+switch, and a hidden media element may never be granted playback at all — that
+combination is what made the film play silently on iOS. The film is full-screen,
+visible, and started by the guest's own tap, so its audio is always permitted, and
+picture and score cannot drift apart.
 
-**To swap the song**, rebuild the file — foley from the opening film, crossfaded into the
-new track, both loudness‑matched:
+Two consequences to preserve if you touch this:
+1. The film is **not** `muted` in the markup, and it is **not** paused on exit.
+2. When the gate opens it fades out and then collapses to a 1px sliver
+   (`.gate.is-done`) — deliberately **not** `display:none`/`visibility:hidden`,
+   because iOS stops a media element the moment it stops being rendered.
+
+The element runs 1:05: 0-5s the film's own envelope-opening sound, 5-7s a crossfade,
+then the sax cover to a fade-out that lands on the song's own phrase break. The
+picture ends at 7s (`FILM_END` in `app.js`), which is when the gate leaves — via
+`timeupdate`, not `ended`. Muting uses `.muted` (settable on iOS; `.volume` is not).
+
+**To swap the song**, rebuild the film's audio and remux it into the video:
 
 ```
 ffmpeg -t 7.0 -i opening-source.mp4 -vn -c:a pcm_s16le foley.wav
 ffmpeg -i foley.wav -ss <song-start> -i new-song.mp3 \
   -filter_complex "[0:a]loudnorm=I=-20:TP=-2:LRA=11,aresample=44100[v];\
                    [1:a]loudnorm=I=-20:TP=-2:LRA=11,aresample=44100[s];\
-                   [v][s]acrossfade=d=2.0:c1=tri:c2=tri[a]" \
-  -map "[a]" -c:a libmp3lame -q:a 5 assets/ambient.mp3
+                   [v][s]acrossfade=d=2.0:c1=tri:c2=tri,afade=t=out:st=<fade>:d=4.9:curve=losi[a]" \
+  -map "[a]" -t <total> -c:a pcm_s16le score.wav
+ffmpeg -i assets/opening.mp4 -i score.wav \
+  -filter_complex "[0:v]tpad=stop_mode=clone:stop_duration=<total-7>[v]" \
+  -map "[v]" -map 1:a -c:v libx264 -crf 23 -pix_fmt yuv420p -c:a aac -b:a 96k \
+  -movflags +faststart -t <total> assets/opening.mp4
 ```
 
-Then bump `ambient.mp3?v=N` in `index.html`. To make audio **off by default**, change
-`let want = "on"` / `let pref = "on"` to `"off"` in `assets/app.js`.
+Then bump `opening.*?v=N` in `index.html`. To make sound **off by default**, change
+the `want = "on"` default in `applyAudioPref()` in `assets/app.js`.
 
 ### 5. Registry — LIVE ✅
 The invitation didn't include registry info, so the two **Registry** links point at
