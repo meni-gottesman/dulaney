@@ -484,7 +484,7 @@
 
     // ===== CONFIG — set these to go live ===================================
     // Paste the Apps Script web-app URL (…/exec). Empty = local demo mode.
-    const RSVP_ENDPOINT = "";
+    const RSVP_ENDPOINT = "https://script.google.com/macros/s/AKfycbyUW6fuLsfdkX9aswrp0cYaM0QGytlcuEYEe2D8_OJiVXe4UZc54ALL55eDaTCF4-O4ig/exec";
     // Demo-only password (local mode). In live mode the REAL password lives in
     // the Apps Script, NOT here — this value is ignored when an endpoint is set.
     const DEMO_ADMIN_PASSWORD = "dulaney2027";
