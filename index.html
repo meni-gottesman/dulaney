@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>The Dulaney Wedding — Nevis, West Indies · May 2027</title>
 <meta name="description" content="Jaden &amp; McKenna Dulaney — bon voyage. A celebration at the Four Seasons, Nevis · May 6–10, 2027." />
-<meta name="theme-color" content="#191512" />
+<!-- Starts as the envelope's navy, not the site's near-black: iOS Safari paints the
+     status-bar and toolbar strips with theme-color, and anything else leaves dark
+     bands above and below the opening film. app.js swaps it to the site colour
+     (#191512) once the gate opens. -->
+<meta name="theme-color" content="#152538" id="themeColor" />
 <meta name="color-scheme" content="dark" />
 
 <link rel="canonical" href="https://destinationdulaney.com/" />
@@ -347,6 +351,6 @@
   </div>
 </section>
 
-<script src="assets/app.js?v=17"></script>
+<script src="assets/app.js?v=18"></script>
 </body>
 </html>
