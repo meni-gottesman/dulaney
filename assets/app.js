@@ -51,6 +51,14 @@
       // playing while it stays rendered, so once the overlay has faded we shrink
       // it to a 1px sliver (.is-done) instead of hiding it.
       window.setTimeout(function () { gate.classList.add("is-done"); }, 1600);
+      // It stays in the DOM for the score, so stop presenting it as an open modal —
+      // otherwise screen readers treat the whole site as outside a live dialog.
+      try {
+        gate.removeAttribute("role");
+        gate.removeAttribute("aria-modal");
+        gate.removeAttribute("tabindex");
+        gate.setAttribute("aria-hidden", "true");
+      } catch (e) {}
       const t = focusTarget || $("#top");
       if (t) t.focus({ preventScroll: true });
     };
@@ -75,10 +83,20 @@
       });
     } else {
       lockBackground(gate);
-      let clicked = false;
+      let clicked = false, watchdog = 0;
       const playFilm = function () {
         const p = gateVideo.play();
         if (p && p.catch) p.catch(function () {});
+      };
+      // SAFETY NET. The gate normally leaves on `timeupdate`, but a paused element
+      // stops firing it — and the phone pauses this one whenever the guest locks
+      // the screen, takes a call, pulls down notifications or switches apps. Without
+      // a fallback that stranded them behind the envelope with no way out. After a
+      // tap the gate now ALWAYS opens within a few seconds of the film's length,
+      // whatever the media does.
+      const armWatchdog = function () {
+        window.clearTimeout(watchdog);
+        watchdog = window.setTimeout(exitGate, (FILM_END + 5) * 1000);
       };
       gateVideo.addEventListener("playing", function () { gate.classList.add("is-playing"); });
       // The element runs on past the picture to carry the score, so we leave the
@@ -86,13 +104,29 @@
       gateVideo.addEventListener("timeupdate", function () {
         if (!opened && gateVideo.currentTime >= FILM_END) exitGate();
       });
-      gateVideo.addEventListener("error", function () { if (clicked) window.setTimeout(exitGate, 400); });
-      gate.addEventListener("click", function () {
-        if (opened || clicked) return;
+      // A film that fails or stalls must never strand anyone.
+      gateVideo.addEventListener("error", function () { if (clicked) exitGate(); });
+      gateVideo.addEventListener("stalled", function () { if (clicked) armWatchdog(); });
+      // Coming back to the tab: if they're still at the envelope, pick the film up
+      // again (silenceOnExit paused it when they left).
+      document.addEventListener("visibilitychange", function () {
+        if (!document.hidden && !opened && clicked) { playFilm(); armWatchdog(); }
+      });
+
+      const enter = function () {
+        if (opened) return;
+        if (clicked) { exitGate(); return; }  // a second tap means "just let me in"
         clicked = true;
         applyAudioPref();   // sets .muted inside the gesture, before play()
         playFilm();
+        armWatchdog();
+      };
+      gate.addEventListener("click", enter);
+      // Keyboard and switch-access guests need a way in too.
+      gate.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") { e.preventDefault(); enter(); }
       });
+      try { gate.focus({ preventScroll: true }); } catch (e) {}
     }
   } else {
     // No gate on this page — show content immediately.
@@ -139,7 +173,14 @@
   function scoreOn() {
     if (!audioEl) return;
     audioEl.muted = false;
-    if (audioEl.paused && audioEl.currentTime < audioEl.duration) {
+    // The score is only ~1:05, so it often finishes while the guest is still
+    // reading. Without this the control did nothing forever after that — and still
+    // showed itself as "playing". Restart from where the music comes in; replaying
+    // the envelope-opening sound mid-visit would make no sense.
+    if (audioEl.ended || (audioEl.duration && audioEl.currentTime >= audioEl.duration - 0.25)) {
+      try { audioEl.currentTime = 7.0; } catch (e) {}
+    }
+    if (audioEl.paused) {
       const p = audioEl.play(); if (p && p.catch) p.catch(function () {});
     }
     isOn = true; setAudioUI(true);
@@ -435,7 +476,9 @@
     const lsAll = () => { try { return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); } catch (e) { return []; } };
     const lsSave = (a) => { try { localStorage.setItem(LS_KEY, JSON.stringify(a)); } catch (e) {} };
     const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-    const safePhoto = (p) => (typeof p === "string" && /^data:image\//.test(p)) ? p : "";
+    // Only a base64 image data URL, and nothing that could close the src="" it gets
+    // dropped into — the value comes back from the sheet, so treat it as untrusted.
+    const safePhoto = (p) => (typeof p === "string" && /^data:image\/(png|jpeg|jpg|gif|webp);base64,[A-Za-z0-9+/=]+$/.test(p)) ? p : "";
     const pub = (r) => ({ name: r.name, party: r.party, companions: r.companions || [], bio: r.bio || "", photo: safePhoto(r.photo) });
     const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
     const initialsOf = (name) => (String(name || "?").trim().split(/\s+/).map((w) => w[0]).filter(Boolean).slice(0, 2).join("") || "?").toUpperCase();
@@ -571,7 +614,10 @@
       };
       const btn = $("#rsvpSubmit");
       btn.disabled = true; statusEl.textContent = "Sending…";
-      api.submit(rec).then(() => {
+      api.submit(rec).then((res) => {
+        // The endpoint answers 200 even when it refuses the write, so a reply could
+        // be lost while the guest was told "Received with love". Trust res.ok only.
+        if (res && res.ok === false) throw new Error(res.error || "not saved");
         try { localStorage.setItem("nevis_my_rsvp", JSON.stringify(rec)); } catch (x) {}
         statusEl.textContent = "";
         showThanks(rec);
@@ -580,7 +626,7 @@
         .then(() => { btn.disabled = false; });
     });
 
-    function showThanks(rec) {
+    function showThanks(rec, scroll) {
       const attending = rec.attending === "yes";
       const first = rec.name ? rec.name.split(" ")[0] : "";
       $("#thanksEyebrow").textContent = attending ? "Received with love" : "Thank you for letting us know";
@@ -592,29 +638,41 @@
         : "We’ll miss you — but we’re so grateful you let us know.";
       form.style.display = "none";
       thanks.classList.add("show");
-      thanks.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "center" });
+      // Skipped when we're just restoring a previous reply on page load — nobody
+      // wants to be yanked down the page the moment they arrive.
+      if (scroll !== false) thanks.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "center" });
     }
+
+    /* ----- a reply already sent from this device ----- */
+    const savedReply = function () {
+      try { return JSON.parse(localStorage.getItem("nevis_my_rsvp") || "null"); } catch (x) { return null; }
+    };
+    function fillFormFromSaved(mine) {
+      if (!mine) return;
+      $("#guestName").value = mine.name || "";
+      $("#guestEmail").value = mine.email || "";
+      const r = form.querySelector('[name="attending"][value="' + mine.attending + '"]'); if (r) r.checked = true;
+      $("#weddingSong").value = mine.song || "";
+      if (mine.roomBooked) { const rb = form.querySelector('[name="roomBooked"][value="' + mine.roomBooked + '"]'); if (rb) rb.checked = true; }
+      $("#guestBio").value = mine.bio || "";
+      setPhotoPreview(safePhoto(mine.photo));
+      $("#note").value = mine.note || "";
+      setCompanions(mine.companions);
+      syncIfYes();
+    }
+
+    // Show a returning guest that they've already replied, rather than a blank
+    // form. A blank form invited them to "reply again" — and because a submit
+    // overwrites their whole row, that silently wiped their party, song and note.
+    const mine0 = savedReply();
+    if (mine0 && mine0.email) showThanks(mine0, false);
 
     /* ----- change my reply (this device) ----- */
     const editAgain = $("#rsvpEditAgain");
     if (editAgain) editAgain.addEventListener("click", () => {
       thanks.classList.remove("show");
       form.style.display = "";
-      try {
-        const mine = JSON.parse(localStorage.getItem("nevis_my_rsvp") || "null");
-        if (mine) {
-          $("#guestName").value = mine.name || "";
-          $("#guestEmail").value = mine.email || "";
-          const r = form.querySelector('[name="attending"][value="' + mine.attending + '"]'); if (r) r.checked = true;
-          $("#weddingSong").value = mine.song || "";
-          if (mine.roomBooked) { const rb = form.querySelector('[name="roomBooked"][value="' + mine.roomBooked + '"]'); if (rb) rb.checked = true; }
-          $("#guestBio").value = mine.bio || "";
-          setPhotoPreview(safePhoto(mine.photo));
-          $("#note").value = mine.note || "";
-          setCompanions(mine.companions);
-          syncIfYes();
-        }
-      } catch (x) {}
+      fillFormFromSaved(savedReply());
       form.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "center" });
     });
 
