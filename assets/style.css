@@ -62,7 +62,12 @@ body {
 }
 
 /* When the envelope gate is active, lock scroll */
-body.is-sealed { overflow: hidden; height: 100vh; height: 100dvh; }
+/* While the gate is up, the page's own background is what iOS Safari samples to
+   paint its status-bar and toolbar strips — with the site's #191512 the film sat
+   between two dark bands. Use the envelope's navy (midway between the film's top
+   edge #20314a and its bottom edge #0e1b2b) so the screen reads as one envelope.
+   Reverts the moment .is-sealed comes off. */
+body.is-sealed { overflow: hidden; height: 100vh; height: 100dvh; background: #17263a; }
 
 img { max-width: 100%; display: block; }
 a { color: inherit; }
