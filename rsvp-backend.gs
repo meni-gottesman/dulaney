@@ -90,15 +90,43 @@ function submit_(rec) {
   if (!rec || !rec.email) return { ok: false, error: "email required" };
   var sh = sheet_();
   var values = sh.getDataRange().getValues();
-  var rowIndex = -1, id = "";
+  var rowIndex = -1, id = "", prev = null;
   for (var i = 1; i < values.length; i++) {
-    if (String(values[i][2]).toLowerCase() === String(rec.email).toLowerCase()) { rowIndex = i + 1; id = values[i][0]; break; }
+    if (String(values[i][2]).toLowerCase() === String(rec.email).toLowerCase()) {
+      rowIndex = i + 1; id = values[i][0]; prev = values[i]; break;
+    }
   }
   if (!id) id = Utilities.getUuid();
+
+  // MERGE, don't clobber. A guest replying a second time — especially from another
+  // device, where the form starts empty — used to overwrite their entire row and
+  // silently destroy their party, companions, song, note, bio and photo (a party
+  // of 3 collapsed to 1). Empty incoming fields now keep whatever is already there.
+  // Declining is the one case where clearing IS the intent.
+  var declining = String(rec.attending || "") === "no";
+  function pick(incoming, col) {
+    if (incoming !== undefined && incoming !== null && String(incoming) !== "") return incoming;
+    return prev ? prev[col] : "";
+  }
+  var companions = (rec.companions && rec.companions.length)
+    ? rec.companions.join("; ")
+    : (declining ? "" : (prev ? prev[5] : ""));
+  var party = Number(rec.party);
+  if (declining) party = 0;
+  else if (!party) party = prev ? (Number(prev[4]) || 0) : 0;
+
   var row = [
-    id, rec.name || "", rec.email, rec.attending || "no",
-    Number(rec.party) || 0, (rec.companions || []).join("; "),
-    rec.song || "", rec.roomBooked || "", rec.bio || "", rec.photo || "", rec.note || "",
+    id,
+    pick(rec.name, 1),
+    rec.email,
+    rec.attending || (prev ? prev[3] : "no"),
+    party,
+    companions,
+    pick(rec.song, 6),
+    declining ? "" : pick(rec.roomBooked, 7),
+    declining ? "" : pick(rec.bio, 8),
+    declining ? "" : pick(rec.photo, 9),
+    pick(rec.note, 10),
     new Date().toISOString()
   ];
   if (rowIndex > 0) sh.getRange(rowIndex, 1, 1, HEADERS.length).setValues([row]);
