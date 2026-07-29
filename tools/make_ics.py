@@ -110,6 +110,10 @@ cal += event(
 cal += event(
     "ceremony-2027",
     "The Ceremony — Jaden & McKenna",
+    # The time is anchored to Nevis, so a guest still at home sees it converted to
+    # their own zone. Spell it out so nobody mistakes that for the real hour.
+    "5:00 PM Nevis time (AST) — your calendar shows this in your local time zone "
+    "until you land.\n"
     "Vows on the Oceanfront 18th Lawn, with cocktails and dinner to follow.\n"
     "Dress: your best in black evening wear.\n"
     f"{SITE}",
