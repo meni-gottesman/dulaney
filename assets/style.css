@@ -147,11 +147,25 @@ button { font-family: inherit; cursor: pointer; }
   overflow: hidden;
   background: #ffffff; /* the film blooms to white; the gate then fades from white to the site */
   transition: opacity 1.4s ease;
+  /* iPhone: while Safari's toolbars are showing, the layout viewport is SHORTER
+     than the screen, which left the film short of the bottom. Take the LARGEST
+     viewport so it covers in every toolbar state (the film is object-fit:cover,
+     so the extra is simply cropped). Ordered oldest-to-newest — each line only
+     overrides the one above where supported. */
+  height: 100vh;
+  height: -webkit-fill-available;
+  height: 100lvh;
 }
 .gate__video {
-  position: absolute; inset: 0; width: 100%; height: 100%;
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  /* Fill the screen edge to edge on every device; the source is landscape, so on
+     a portrait phone this crops to the centre of the envelope by design. */
   object-fit: cover; object-position: 50% 50%; background: #ffffff;
 }
+/* The poster is landscape too — make sure Safari crops it the same way as the
+   film rather than letterboxing it before the tap. */
+.gate__video[poster] { object-fit: cover; }
 .gate.is-open { opacity: 0; pointer-events: none; }
 /* The film carries the score, so it must keep playing after the gate opens —
    and iOS won't play a media element that is display:none or visibility:hidden.
