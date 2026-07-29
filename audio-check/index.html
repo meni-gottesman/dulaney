@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Sound check — Dulaney</title>
+<meta name="robots" content="noindex, nofollow" />
+<meta name="theme-color" content="#191512" />
+<style>
+  :root { color-scheme: dark; }
+  body { margin:0; padding:1.25rem 1.25rem 4rem; background:#191512; color:#f1ebdf;
+         font:16px/1.5 -apple-system, system-ui, sans-serif; }
+  h1 { font-size:1.25rem; margin:0 0 .25rem; }
+  p.sub { color:#9a9181; margin:0 0 1.25rem; font-size:.9rem; }
+  button { font:inherit; font-weight:600; width:100%; padding:1.1rem; margin:.4rem 0;
+           background:#6fb3c4; color:#10201f; border:0; border-radius:10px; }
+  button.ghost { background:transparent; color:#6fb3c4; border:1px solid #38322b; font-weight:400; }
+  .verdict { padding:1rem; border-radius:10px; margin:1rem 0; font-weight:600; }
+  .good { background:#16301f; color:#8fe0a6; }
+  .bad  { background:#331a1a; color:#ffb0a8; }
+  .warn { background:#332a16; color:#ffd79a; }
+  table { width:100%; border-collapse:collapse; font-size:.86rem; margin-top:.5rem; }
+  td { padding:.45rem .3rem; border-bottom:1px solid #2a251f; vertical-align:top; }
+  td:first-child { color:#9a9181; width:52%; }
+  td:last-child { font-family:ui-monospace,Menlo,monospace; }
+  .pill { display:inline-block; padding:.15rem .5rem; border-radius:99px; font-size:.75rem; }
+  .yes { background:#16301f; color:#8fe0a6; } .no { background:#331a1a; color:#ffb0a8; }
+  h2 { font-size:.95rem; margin:1.75rem 0 .25rem; color:#6fb3c4; }
+</style>
+</head>
+<body>
+
+<h1>Sound check</h1>
+<p class="sub">For Meni — open this on the iPhone that has no sound, tap the button, then screenshot the whole page.</p>
+
+<div id="pref"></div>
+
+<h2>1 · The real invitation film</h2>
+<p class="sub" style="margin-bottom:.5rem">Exactly the file and settings the site uses.</p>
+<button id="go">Tap to play the film's sound</button>
+<div id="verdictA"></div>
+<table id="tblA"></table>
+
+<h2>2 · A plain audio element</h2>
+<p class="sub" style="margin-bottom:.5rem">The kind iPhone's Ring/Silent switch <em>does</em> mute. Comparing the two tells us whether the switch is the culprit.</p>
+<button class="ghost" id="go2">Tap to play a test tone</button>
+<div id="verdictB"></div>
+<table id="tblB"></table>
+
+<h2>3 · Reset</h2>
+<p class="sub" style="margin-bottom:.5rem">If the site ever remembered you muting it, this clears that.</p>
+<button class="ghost" id="reset">Clear the saved sound setting</button>
+<div id="resetMsg"></div>
+
+<!-- the real film, same attributes as the site -->
+<video id="film" playsinline preload="auto" style="width:100%;border-radius:10px;margin-top:.5rem">
+  <source src="/assets/opening.mp4?v=15" type="video/mp4" />
+</video>
+
+<script>
+(function () {
+  var $ = function (s) { return document.querySelector(s); };
+  var film = $("#film");
+
+  function row(k, v) { return "<tr><td>" + k + "</td><td>" + v + "</td></tr>"; }
+  function pill(ok, t) { return '<span class="pill ' + (ok ? "yes" : "no") + '">' + t + "</span>"; }
+
+  function showPref() {
+    var p = null;
+    try { p = localStorage.getItem("nevis_audio"); } catch (e) { p = "(blocked)"; }
+    var muted = p === "off";
+    $("#pref").innerHTML =
+      '<div class="verdict ' + (muted ? "bad" : "good") + '">' +
+      (muted
+        ? "Saved setting: MUTED. This alone would keep the film silent on every visit. Tap “Clear the saved sound setting” below, then reload the invitation."
+        : "Saved setting: " + (p === null ? "none yet (sound on by default)" : p)) +
+      "</div>";
+  }
+  showPref();
+
+  var playErrA = "not tried";
+  $("#go").addEventListener("click", function () {
+    film.muted = false;
+    var p = film.play();
+    if (p && p.catch) p.catch(function (e) { playErrA = e.name + ": " + e.message; });
+    setTimeout(reportA, 2600);
+  });
+
+  function reportA() {
+    var decoded = film.webkitAudioDecodedByteCount;
+    var advancing = film.currentTime > 0.4;
+    var audible = advancing && !film.muted && (decoded === undefined || decoded > 0);
+    $("#verdictA").innerHTML = audible
+      ? '<div class="verdict good">The film IS producing sound. If you still hear nothing, it is the phone, not the website — check the Ring/Silent switch on the left edge, and the volume while the film plays.</div>'
+      : '<div class="verdict bad">The film is NOT producing sound. Send me this page and I will fix it — the table below says why.</div>';
+    $("#tblA").innerHTML =
+      row("playing", pill(!film.paused, film.paused ? "paused" : "playing")) +
+      row("time advancing", pill(advancing, film.currentTime.toFixed(2) + "s")) +
+      row("muted", pill(!film.muted, String(film.muted))) +
+      row("volume", film.volume) +
+      row("audio bytes decoded", decoded === undefined ? "n/a (not Safari)" : decoded) +
+      row("has an audio track", pill(decoded === undefined || decoded > 0, decoded > 0 ? "yes" : String(decoded))) +
+      row("readyState", film.readyState + " / 4") +
+      row("duration", isNaN(film.duration) ? "unknown" : film.duration.toFixed(1) + "s") +
+      row("media error", film.error ? film.error.code + " " + film.error.message : "none") +
+      row("play() result", playErrA);
+  }
+
+  var playErrB = "not tried";
+  $("#go2").addEventListener("click", function () {
+    // a 1-second beep, generated inline so nothing else can be blamed
+    var sr = 44100, n = sr, buf = new ArrayBuffer(44 + n * 2), view = new DataView(buf);
+    var W = function (o, s) { for (var i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
+    W(0, "RIFF"); view.setUint32(4, 36 + n * 2, true); W(8, "WAVEfmt ");
+    view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+    view.setUint32(24, sr, true); view.setUint32(28, sr * 2, true);
+    view.setUint16(32, 2, true); view.setUint16(34, 16, true); W(36, "data");
+    view.setUint32(40, n * 2, true);
+    for (var i = 0; i < n; i++) view.setInt16(44 + i * 2, Math.sin(i / sr * 440 * 2 * Math.PI) * 12000, true);
+    var a = new Audio(URL.createObjectURL(new Blob([buf], { type: "audio/wav" })));
+    var p = a.play();
+    if (p && p.catch) p.catch(function (e) { playErrB = e.name + ": " + e.message; });
+    setTimeout(function () {
+      $("#verdictB").innerHTML = '<div class="verdict warn">Did you hear a beep? If the film above was silent but this beep played, tell me — that is the opposite of what I expect and changes the fix.</div>';
+      $("#tblB").innerHTML =
+        row("playing", pill(!a.paused, a.paused ? "paused" : "playing")) +
+        row("time advancing", pill(a.currentTime > 0.1, a.currentTime.toFixed(2) + "s")) +
+        row("play() result", playErrB);
+    }, 1800);
+  });
+
+  $("#reset").addEventListener("click", function () {
+    try { localStorage.removeItem("nevis_audio"); sessionStorage.removeItem("nevis_entered"); } catch (e) {}
+    showPref();
+    $("#resetMsg").innerHTML = '<div class="verdict good">Cleared. Now open <a href="/" style="color:inherit">the invitation</a> and tap the envelope.</div>';
+  });
+})();
+</script>
+</body>
+</html>
