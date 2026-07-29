@@ -40,6 +40,12 @@
       body.classList.add("entered");
       unlockBackground();
       try { sessionStorage.setItem("nevis_entered", "1"); } catch (e) {}
+      // The browser chrome was tinted to the envelope's navy so the film met the
+      // screen edges; hand it back to the site's colour now that the site is here.
+      try {
+        const tc = $("#themeColor");
+        if (tc) tc.setAttribute("content", "#191512");
+      } catch (e) {}
       // The film is deliberately NOT paused: it carries the score, which plays on
       // for ~a minute after the picture ends. iOS only keeps a media element
       // playing while it stays rendered, so once the overlay has faded we shrink
