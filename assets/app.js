@@ -40,21 +40,17 @@
       body.classList.add("entered");
       unlockBackground();
       try { sessionStorage.setItem("nevis_entered", "1"); } catch (e) {}
-      try { gateVideo.pause(); } catch (e) {}
+      // The film is deliberately NOT paused: it carries the score, which plays on
+      // for ~a minute after the picture ends. iOS only keeps a media element
+      // playing while it stays rendered, so once the overlay has faded we shrink
+      // it to a 1px sliver (.is-done) instead of hiding it.
+      window.setTimeout(function () { gate.classList.add("is-done"); }, 1600);
       const t = focusTarget || $("#top");
       if (t) t.focus({ preventScroll: true });
     };
 
-    // The film's ambient score starts on the same tap that plays the film (the
-    // film itself is muted; we play the <audio> element — reliable on iOS).
-    function startOpeningAudio() {
-      var want = "on";
-      try { want = localStorage.getItem("nevis_audio") || "on"; } catch (e) {}
-      if (want === "off") { setAudioUI(false); return; }
-      if (hasRealTrack) playLoop();
-      isOn = true; setAudioUI(true);
-      try { localStorage.setItem("nevis_audio", "on"); } catch (e) {}
-    }
+    // The picture ends here; the element plays on, carrying the score.
+    const FILM_END = 7.0;
 
     let returning = false;
     try { returning = sessionStorage.getItem("nevis_entered") === "1"; } catch (e) {}
@@ -63,26 +59,34 @@
       gate.classList.add("is-instant");
       exitGate();
     } else if (prefersReduced) {
-      // honour reduced motion: hold on the sealed poster, enter on tap
+      // Honour reduced motion: hold on the sealed poster and enter on the tap
+      // without the film — but still start the element so the score plays.
       lockBackground(gate);
-      gate.addEventListener("click", function () { startOpeningAudio(); exitGate(); });
+      gate.addEventListener("click", function () {
+        applyAudioPref();
+        const p = gateVideo.play(); if (p && p.catch) p.catch(function () {});
+        exitGate();
+      });
     } else {
       lockBackground(gate);
       let clicked = false;
       const playFilm = function () {
-        if (opened) return;
         const p = gateVideo.play();
         if (p && p.catch) p.catch(function () {});
       };
       gateVideo.addEventListener("playing", function () { gate.classList.add("is-playing"); });
-      gateVideo.addEventListener("ended", function () {
-        // Align the song's swell with the reveal: if the audio is still in the
-        // envelope/quiet part when the (shorter) film ends, jump to the swell-in point.
-        try { if (audioEl && hasRealTrack && !audioEl.paused && audioEl.currentTime < SONG_FADE_START) audioEl.currentTime = SONG_FADE_START; } catch (e) {}
-        exitGate();
+      // The element runs on past the picture to carry the score, so we leave the
+      // gate when the PICTURE finishes — not on 'ended', which is now ~1:05 away.
+      gateVideo.addEventListener("timeupdate", function () {
+        if (!opened && gateVideo.currentTime >= FILM_END) exitGate();
       });
       gateVideo.addEventListener("error", function () { if (clicked) window.setTimeout(exitGate, 400); });
-      gate.addEventListener("click", function () { if (!opened && !clicked) { clicked = true; startOpeningAudio(); playFilm(); } });
+      gate.addEventListener("click", function () {
+        if (opened || clicked) return;
+        clicked = true;
+        applyAudioPref();   // sets .muted inside the gesture, before play()
+        playFilm();
+      });
     }
   } else {
     // No gate on this page — show content immediately.
@@ -90,172 +94,75 @@
     body.classList.add("entered");
   }
 
-  /* ---------- AMBIENT AUDIO ----------
-     The looping track plays through a Web Audio gain node so volume/fades work
-     even on iOS (where HTMLMediaElement.volume is read-only and a deferred play
-     won't start). Falls back to a synthesized pad if no <source> is present. */
+  /* ---------- THE SCORE ----------
+     There is exactly ONE media element with sound on this page: the opening film
+     itself, which now carries the score in its own audio track.
+
+     That is deliberate. On iPhone a separate <audio> element is silenced by the
+     physical Ring/Silent switch, and a hidden media element may never be granted
+     playback at all — which is why the film played but the music didn't. The film
+     is full-screen, visible, and started by the guest's own tap, so its audio is
+     always allowed, and picture and score can never drift apart.
+
+     Muting uses .muted, which IS settable on iOS (.volume is read-only there).
+     The film keeps playing after the picture ends — see exitGate. */
   const audioToggle = $("#audioToggle");
-  const audioEl = $("#audioEl");
-  const hasRealTrack = audioEl && audioEl.querySelector("source");
-  let audioCtx, master, started = false, isOn = false;
-
-  // Play the looping <audio> as simply as possible — the only thing iOS reliably
-  // honours: a bare .play() on ONE media element inside a user gesture. No Web
-  // Audio, no volume changes (both are ignored/unreliable on iOS); the file is
-  // pre-leveled so it sits gently, and the gate video is MUTED so it never steals
-  // the audio session from this element.
-  function playLoop() {
-    if (!hasRealTrack) return;
-    const p = audioEl.play();
-    if (p && p.catch) p.catch(function () { armAudioRetry(); });
-  }
-  // iOS can still refuse that first play (Low Power Mode, or another app holding
-  // the audio session). Rather than stay silent for the whole visit, start on the
-  // guest's next tap anywhere. One shot — never re-arms itself into a loop.
-  let audioRetryArmed = false;
-  function armAudioRetry() {
-    if (audioRetryArmed || !hasRealTrack) return;
-    audioRetryArmed = true;
-    const go = function () {
-      document.removeEventListener("pointerdown", go, true);
-      audioRetryArmed = false;
-      if (!isOn || !audioEl.paused) return;
-      const p = audioEl.play(); if (p && p.catch) p.catch(function () {});
-    };
-    document.addEventListener("pointerdown", go, true);
-  }
-  function pauseLoop() {
-    if (hasRealTrack) { try { audioEl.pause(); } catch (e) {} }
-  }
-
-  function buildPad() {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    master = audioCtx.createGain();
-    master.gain.value = 0.0001;
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = "lowpass"; filter.frequency.value = 760; filter.Q.value = 0.6;
-    filter.connect(master); master.connect(audioCtx.destination);
-
-    // Warm chord: a gentle, wide major-9 voicing, lightly detuned.
-    const freqs = [110, 164.81, 220, 277.18, 329.63];
-    freqs.forEach((f, i) => {
-      const o = audioCtx.createOscillator();
-      o.type = i % 2 ? "sine" : "triangle";
-      o.frequency.value = f;
-      o.detune.value = (i - 2) * 4;
-      const g = audioCtx.createGain();
-      g.gain.value = 0.16 / freqs.length;
-      // slow tremolo via LFO
-      const lfo = audioCtx.createOscillator();
-      lfo.frequency.value = 0.06 + i * 0.017;
-      const lfoGain = audioCtx.createGain();
-      lfoGain.gain.value = 0.5 / freqs.length;
-      lfo.connect(lfoGain); lfoGain.connect(g.gain);
-      o.connect(g); g.connect(filter);
-      o.start(); lfo.start();
-    });
-
-    // Soft "sea" — filtered noise swells.
-    const bufferSize = 2 * audioCtx.sampleRate;
-    const noiseBuf = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const data = noiseBuf.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.5;
-    const noise = audioCtx.createBufferSource();
-    noise.buffer = noiseBuf; noise.loop = true;
-    const nFilter = audioCtx.createBiquadFilter();
-    nFilter.type = "bandpass"; nFilter.frequency.value = 480; nFilter.Q.value = 0.4;
-    const nGain = audioCtx.createGain(); nGain.gain.value = 0.05;
-    noise.connect(nFilter); nFilter.connect(nGain); nGain.connect(master);
-    noise.start();
-  }
-
-  function fade(target, t) {
-    if (!master) return;
-    const now = audioCtx.currentTime;
-    master.gain.cancelScheduledValues(now);
-    master.gain.setValueAtTime(Math.max(master.gain.value, 0.0001), now);
-    master.gain.exponentialRampToValueAtTime(Math.max(target, 0.0001), now + t);
-  }
-
-  function startAudio() {
-    // The ambient track begins on the tap-to-open gesture (a valid user gesture),
-    // unless the guest muted it on a previous visit. They can mute any time.
-    let pref = "on";
-    try { pref = localStorage.getItem("nevis_audio") || "on"; } catch (e) {}
-    if (pref !== "on") { setAudioUI(false); return; }
-    enableAudio();
-  }
-
-  function enableAudio() {
-    if (hasRealTrack) {
-      playLoop();
-    } else {
-      if (!started) { try { buildPad(); started = true; } catch (e) { return; } }
-      if (audioCtx.state === "suspended") audioCtx.resume();
-      fade(0.5, 4);
-    }
-    isOn = true; setAudioUI(true);
-    try { localStorage.setItem("nevis_audio", "on"); } catch (e) {}
-  }
-
-  function disableAudio() {
-    if (hasRealTrack) { pauseLoop(); }
-    else if (master) { fade(0.0001, 0.6); }
-    isOn = false; setAudioUI(false);
-    try { localStorage.setItem("nevis_audio", "off"); } catch (e) {}
-  }
+  const audioEl = gateVideo;                 // the film IS the score
+  const hasRealTrack = !!audioEl;
+  let isOn = false;
 
   function setAudioUI(on) {
     if (!audioToggle) return;
     audioToggle.classList.toggle("is-playing", on);
     audioToggle.classList.toggle("is-muted", !on);
     audioToggle.setAttribute("aria-pressed", String(on));
-    audioToggle.setAttribute("aria-label", on ? "Mute ambient sound" : "Play ambient sound");
+    audioToggle.setAttribute("aria-label", on ? "Mute the music" : "Play the music");
   }
 
-  // ambient.mp3 = [the film's own envelope-opening sound 0–5s] → [crossfade 5–7s]
-  // → ["Just the Two of Us", sax cover by Brendan Mills] → the song's own composed
-  // fade-out, ending silent at ~3:18. It plays ONCE (no loop): the ending is baked
-  // into the file, which is also why it works on iOS, where HTMLMediaElement.volume
-  // is read-only and can't be ramped from JS.
-  const SONG_FADE_START = 5.4; // the song begins swelling here (≈ the film's white-out / reveal)
-  // Keep the control in sync with the element's REAL state (prevents the
-  // "click twice" bug where the UI said 'on' but nothing was actually playing).
+  // Called on the opening tap, inside the gesture: honour whatever the guest
+  // chose last time, so a returning guest who muted us stays muted.
+  function applyAudioPref() {
+    if (!audioEl) return;
+    let want = "on";
+    try { want = localStorage.getItem("nevis_audio") || "on"; } catch (e) {}
+    audioEl.muted = want === "off";
+    isOn = !audioEl.muted;
+    setAudioUI(isOn);
+  }
+
+  function scoreOn() {
+    if (!audioEl) return;
+    audioEl.muted = false;
+    if (audioEl.paused && audioEl.currentTime < audioEl.duration) {
+      const p = audioEl.play(); if (p && p.catch) p.catch(function () {});
+    }
+    isOn = true; setAudioUI(true);
+    try { localStorage.setItem("nevis_audio", "on"); } catch (e) {}
+  }
+
+  function scoreOff() {
+    if (!audioEl) return;
+    audioEl.muted = true;
+    isOn = false; setAudioUI(false);
+    try { localStorage.setItem("nevis_audio", "off"); } catch (e) {}
+  }
+
   if (audioEl) {
-    audioEl.addEventListener("ended", function () { isOn = false; setAudioUI(false); }); // track faded out — reflect "off"
-    audioEl.addEventListener("playing", function () { isOn = true; setAudioUI(true); });
-    audioEl.addEventListener("pause", function () { if (hasRealTrack && audioEl.currentTime < audioEl.duration - 0.5) { isOn = false; setAudioUI(false); } });
-  }
-
-  // The <audio> starts at preload="metadata" so the 2.3MB track never competes with
-  // the opening for bandwidth. Once the page has painted and gone idle, quietly buffer
-  // it in the background so it's ready the instant the guest taps (no envelope-sound lag).
-  // (iOS ignores media preload until a gesture either way, so this is a desktop/Android win.)
-  if (audioEl && hasRealTrack) {
-    var warmAudio = function () {
-      if (!audioEl.paused || audioEl.currentTime > 0) return; // already started — don't disturb it
-      try { audioEl.preload = "auto"; audioEl.load(); } catch (e) {}
-    };
-    var scheduleWarm = function () {
-      if ("requestIdleCallback" in window) requestIdleCallback(warmAudio, { timeout: 2500 });
-      else window.setTimeout(warmAudio, 700);
-    };
-    if (document.readyState === "complete") scheduleWarm();
-    else window.addEventListener("load", scheduleWarm);
+    // The score runs ~1:05 and ends on its own fade-out; reflect that in the control.
+    audioEl.addEventListener("ended", function () { isOn = false; setAudioUI(false); });
+    audioEl.addEventListener("playing", function () { if (!audioEl.muted) { isOn = true; setAudioUI(true); } });
   }
 
   if (audioToggle) audioToggle.addEventListener("click", function () {
-    var playing = hasRealTrack ? (audioEl && !audioEl.paused) : isOn;
-    if (playing) disableAudio(); else enableAudio();
+    if (!audioEl) return;
+    if (!audioEl.muted && !audioEl.paused) scoreOff(); else scoreOn();
   });
 
   // Stop the music the moment the guest leaves or backgrounds the site — otherwise
-  // phones can keep it playing for a long time after they've moved on (the reported
-  // "it played for hours" bug). We only pause; the saved on/off preference is left
-  // untouched, so the music returns on the guest's next visit.
+  // phones can keep it playing long after they've moved on (the "it played for
+  // hours" report). Only pause; the saved on/off preference is left untouched.
   function silenceOnExit() {
-    if (hasRealTrack) { pauseLoop(); }
-    else if (audioCtx && master) { try { fade(0.0001, 0.25); if (audioCtx.state === "running") audioCtx.suspend(); } catch (e) {} }
+    if (audioEl) { try { audioEl.pause(); } catch (e) {} }
   }
   document.addEventListener("visibilitychange", function () { if (document.hidden) silenceOnExit(); });
   window.addEventListener("pagehide", silenceOnExit);

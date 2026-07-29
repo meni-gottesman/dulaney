@@ -146,13 +146,18 @@ button { font-family: inherit; cursor: pointer; }
   position: fixed; inset: 0; z-index: 300;
   overflow: hidden;
   background: #ffffff; /* the film blooms to white; the gate then fades from white to the site */
-  transition: opacity 1.4s ease, visibility 0s linear 1.4s;
+  transition: opacity 1.4s ease;
 }
 .gate__video {
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: cover; object-position: 50% 50%; background: #ffffff;
 }
-.gate.is-open { opacity: 0; visibility: hidden; pointer-events: none; }
+.gate.is-open { opacity: 0; pointer-events: none; }
+/* The film carries the score, so it must keep playing after the gate opens —
+   and iOS won't play a media element that is display:none or visibility:hidden.
+   So once the overlay has faded (JS adds .is-done ~1.6s later) we collapse it to
+   a 1px sliver behind the page instead of hiding it. */
+.gate.is-done { inset: auto auto 0 0; width: 1px; height: 1px; z-index: -1; }
 .gate.is-instant, .gate.is-instant * { transition: none !important; }
 
 .gate__hint {
@@ -854,14 +859,6 @@ body.entered .hero__date { opacity: 1; transform: translateY(0); }
 .pagefoot__nav a:hover { color: var(--accent); }
 .pagefoot__meta { font-family: var(--font-sans); text-transform: uppercase; letter-spacing: 0.26em; font-size: 0.58rem; color: var(--muted-fg); margin: 0; }
 @media print { .pagefoot { border: 0; } }
-/* The ambient score's media element. It's a <video> (see index.html) so iPhone's
-   Ring/Silent switch doesn't mute it — kept 1px and transparent rather than
-   display:none, which iOS won't play. */
-.audio-media {
-  position: fixed; left: 0; bottom: 0; width: 1px; height: 1px;
-  opacity: 0; pointer-events: none; border: 0; z-index: -1;
-}
-
 /* ── Add to calendar ────────────────────────────────────────────────────────
    Introduced as a small editorial moment — a hairline drop, a serif invitation,
    then two quiet framed buttons — rather than two bare links. */
