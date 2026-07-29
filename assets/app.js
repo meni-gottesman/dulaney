@@ -106,7 +106,23 @@
   // the audio session from this element.
   function playLoop() {
     if (!hasRealTrack) return;
-    const p = audioEl.play(); if (p && p.catch) p.catch(function () {});
+    const p = audioEl.play();
+    if (p && p.catch) p.catch(function () { armAudioRetry(); });
+  }
+  // iOS can still refuse that first play (Low Power Mode, or another app holding
+  // the audio session). Rather than stay silent for the whole visit, start on the
+  // guest's next tap anywhere. One shot — never re-arms itself into a loop.
+  let audioRetryArmed = false;
+  function armAudioRetry() {
+    if (audioRetryArmed || !hasRealTrack) return;
+    audioRetryArmed = true;
+    const go = function () {
+      document.removeEventListener("pointerdown", go, true);
+      audioRetryArmed = false;
+      if (!isOn || !audioEl.paused) return;
+      const p = audioEl.play(); if (p && p.catch) p.catch(function () {});
+    };
+    document.addEventListener("pointerdown", go, true);
   }
   function pauseLoop() {
     if (hasRealTrack) { try { audioEl.pause(); } catch (e) {} }
@@ -197,10 +213,11 @@
     audioToggle.setAttribute("aria-label", on ? "Mute ambient sound" : "Play ambient sound");
   }
 
-  // ambient.mp3 = [envelope-opening sound 0–5.4s] → [song swells in from 5.4s] →
-  // plays at full to ~10s → a gentle 6s fade-out, ending silent at ~16s. It plays
-  // ONCE (no loop): the fade-out is baked into the file so it works on iOS too,
-  // where HTMLMediaElement.volume is read-only and can't be ramped in JS.
+  // ambient.mp3 = [the film's own envelope-opening sound 0–5s] → [crossfade 5–7s]
+  // → ["Just the Two of Us", sax cover by Brendan Mills] → the song's own composed
+  // fade-out, ending silent at ~3:18. It plays ONCE (no loop): the ending is baked
+  // into the file, which is also why it works on iOS, where HTMLMediaElement.volume
+  // is read-only and can't be ramped from JS.
   const SONG_FADE_START = 5.4; // the song begins swelling here (≈ the film's white-out / reveal)
   // Keep the control in sync with the element's REAL state (prevents the
   // "click twice" bug where the UI said 'on' but nothing was actually playing).
