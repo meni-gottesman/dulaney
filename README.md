@@ -212,7 +212,7 @@ exposed in the page.
 
 ### 7. Contacts & deadlines (already wired)
 Stay section: room block held under **“Dempsey–Dulaney Celebration”**; full rates
-(Ocean View Suite $525/night, transfers $180/pp, all-inclusive F&B $390/pp/day);
+(Ocean View Suite $525/night, transfers $180/pp (the room-block discount; the resort brochure's standard rate is $200 adult / $100 child 5-11), all-inclusive F&B $390/pp/day);
 reservations **(869) 469-1111** and **reservations.nev@fourseasons.com** (both tappable);
 resort brochure PDF + resort site linked. Travel section: flight assistance
 **Brett Lafleur** (blafleur3386@gmail.com); travel insurance via **Lynn Vosloo**
