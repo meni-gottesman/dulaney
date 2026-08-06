@@ -738,14 +738,16 @@
 
       adminGate.addEventListener("submit", (e) => {
         e.preventDefault();
-        const pw = $("#adminPw").value;
+        // Trim: a phone keyboard or a paste from a message very often adds a
+        // trailing space, and the check is exact.
+        const pw = ($("#adminPw").value || "").trim();
         adminErr.textContent = "Checking…";
         api.adminAuth(pw).then((res) => {
           if (res && res.ok) {
             adminPw = pw; adminGuests = res.guests || [];
             adminGate.hidden = true; adminPanel.hidden = false; adminErr.textContent = "";
             renderAdmin();
-          } else { adminErr.textContent = "That password didn’t match."; }
+          } else { adminErr.textContent = "That password didn’t match — it’s all lowercase, and watch for an autocorrected capital."; }
         }).catch(() => { adminErr.textContent = "Couldn’t reach the guest list. Please try again."; });
       });
 

@@ -55,7 +55,7 @@
       imagesrcset="assets/hero-m.jpg 932w, assets/hero.jpg 1597w"
       imagesizes="100vw" fetchpriority="high" />
 
-<link rel="stylesheet" href="assets/style.css?v=23" />
+<link rel="stylesheet" href="assets/style.css?v=24" />
 
 <!-- No-JS fallback: if scripts don't run, lift the opening film, unlock scroll,
      and reveal all content so the site is never trapped behind the gate. -->
@@ -267,7 +267,7 @@
         </div>
         <div class="field">
           <label for="guestBio">A little bio <span class="field__opt">(optional)</span></label>
-          <p class="field__hint">A line about you for the guest list — where you’re from, how you know Jaden &amp; McKenna, anything. We can add one for you too.</p>
+          <p class="field__hint"><strong>Everyone can see this</strong> — it appears next to your name on the guest list. Where you’re from, how you know Jaden &amp; McKenna, anything. We can add one for you too.</p>
           <input type="text" id="guestBio" name="bio" maxlength="140" autocomplete="off" placeholder="Old friends of the groom, in from Lisbon…" />
         </div>
         <div class="field">
@@ -342,7 +342,8 @@
     <form class="admin__gate" id="adminGate">
       <div class="field">
         <label for="adminPw">Password</label>
-        <input type="password" id="adminPw" autocomplete="current-password" />
+        <input type="password" id="adminPw" autocomplete="current-password"
+               autocapitalize="none" autocorrect="off" spellcheck="false" />
       </div>
       <button class="btn" type="submit" id="adminEnter">Enter</button>
       <p class="form__status" id="adminError"></p>
@@ -359,6 +360,6 @@
   </div>
 </section>
 
-<script src="assets/app.js?v=20"></script>
+<script src="assets/app.js?v=21"></script>
 </body>
 </html>

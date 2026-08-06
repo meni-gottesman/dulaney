@@ -506,6 +506,19 @@ body.entered .hero__date { opacity: 1; transform: translateY(0); }
 .keyfacts .kf dd strong { font-weight: 500; }
 .fineprint { margin-top: 1.5rem; font-size: 0.95rem; line-height: 1.65; color: var(--charcoal); }
 
+/* A framed aside for a detail that is easy to misread — louder than .fineprint,
+   quieter than a heading. Used for what the room-block price does and doesn't cover. */
+.callout {
+  margin-top: 1.6rem;
+  padding: 1.05rem 1.35rem;
+  border-left: 2px solid var(--accent);
+  background: var(--soft);
+  font-size: 0.98rem;
+  line-height: 1.72;
+  color: var(--charcoal);
+}
+.callout strong { color: var(--fg); }
+
 /* ============================================================================
    SAVE THE DATE — three hearts, scratched to reveal Day · Month · Year
    ========================================================================== */
@@ -720,6 +733,9 @@ body.entered .hero__date { opacity: 1; transform: translateY(0); }
 .collapsed { display: none; }
 #ifYes:not(.collapsed) { display: grid; gap: clamp(1.4rem, 3vw, 2rem); }
 .field__hint { margin: 0; font-size: 0.92rem; color: var(--muted-fg); line-height: 1.5; }
+/* Hints are deliberately dim; a bolded clause inside one (e.g. "everyone can see
+   this") has to lift out of that dimness or it reads as ordinary hint text. */
+.field__hint strong { color: var(--fg); font-weight: 500; }
 .form__status { margin: 0; font-size: 0.9rem; color: var(--charcoal); min-height: 1.2em; }
 
 /* link-style buttons (add guest, change reply, admin actions) */
