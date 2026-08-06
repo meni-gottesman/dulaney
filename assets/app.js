@@ -456,9 +456,10 @@
     // ===== CONFIG — set these to go live ===================================
     // Paste the Apps Script web-app URL (…/exec). Empty = local demo mode.
     const RSVP_ENDPOINT = "https://script.google.com/macros/s/AKfycbyUW6fuLsfdkX9aswrp0cYaM0QGytlcuEYEe2D8_OJiVXe4UZc54ALL55eDaTCF4-O4ig/exec";
-    // Demo-only password (local mode). In live mode the REAL password lives in
-    // the Apps Script, NOT here — this value is ignored when an endpoint is set.
-    const DEMO_ADMIN_PASSWORD = "dulaney2027";
+    // The admin password lives ONLY in the Apps Script, never here — this file is
+    // public. In demo mode (no endpoint) the "guest list" is just this browser's
+    // own localStorage, so any non-empty password opens it; there is nothing to
+    // protect and hardcoding one here would only publish a real credential.
     // =======================================================================
     const LIVE = !!RSVP_ENDPOINT;
     if (!LIVE) console.warn("[RSVP] Demo mode (saves to this browser only). Set RSVP_ENDPOINT in assets/app.js — see README §6 — to collect replies in your Google Sheet.");
@@ -526,7 +527,7 @@
       },
       adminAuth(pw) {
         if (LIVE) return gas({ action: "admin", password: pw });
-        return Promise.resolve(pw === DEMO_ADMIN_PASSWORD ? { ok: true, guests: lsAll() } : { ok: false });
+        return Promise.resolve(pw ? { ok: true, guests: lsAll() } : { ok: false });
       },
       adminUpdate(pw, id, fields) {
         if (LIVE) return gas({ action: "update", password: pw, id: id, fields: fields });

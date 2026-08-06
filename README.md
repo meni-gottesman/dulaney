@@ -205,8 +205,11 @@ CSV** — and the data lives in a plain **Google Sheet they own** (the simplest 
 to manage). The admin password is checked **on Google's servers**, so it's never
 exposed in the page.
 
-**Out of the box it runs in DEMO mode** (saves to that one browser, demo password
-`dulaney2027`) so you can show the couple the whole flow. To make it **live & shared**:
+**Out of the box it runs in DEMO mode** — with no endpoint set the "guest list" is
+just that one browser's own `localStorage`, so any non‑empty password opens the
+Hosts panel and you can show the couple the whole flow. (Nothing real is behind it,
+and a hardcoded password here would only publish a credential — this repo is public.)
+To make it **live & shared**:
 
 1. Create a Google Sheet (visit `sheets.new`) — this is the guest list. Rename tab 1 to **`RSVPs`**.
 2. **Extensions → Apps Script**, delete the sample, and paste **`rsvp-backend.gs`** (in this repo).
