@@ -11,14 +11,26 @@
      `inert` on the background siblings makes everything outside the active
      overlay non-focusable, giving a native focus trap with no Tab handler. */
   const body = document.body;
+  // Bring `active` to the front and make everything else unreachable.
+  // The active element must be un-inerted, not merely skipped: these layers
+  // stack. The opening film inerts the whole page, so a guest arriving straight
+  // at /#admin had the Hosts panel opened on top of a film that had already
+  // marked it inert — the password field rendered fine but could not be clicked
+  // or focused at all. Skipping it left that stale inert in place.
   function lockBackground(active) {
     Array.from(body.children).forEach((el) => {
-      if (el === active || el.tagName === "SCRIPT") return;
+      if (el === active || el.tagName === "SCRIPT") { el.removeAttribute("inert"); return; }
       el.setAttribute("inert", "");
     });
   }
+  // Closing a layer must not expose the page when the opening film is still
+  // sealing it — restore the film's lock in that case.
   function unlockBackground() {
     Array.from(body.children).forEach((el) => el.removeAttribute("inert"));
+    if (body.classList.contains("is-sealed")) {
+      const g = document.getElementById("gate");
+      if (g) lockBackground(g);
+    }
   }
 
   /* ---------- ENTRY GATE (home page only) — the opening film ----------
