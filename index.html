@@ -55,7 +55,7 @@
       imagesrcset="assets/hero-m.jpg 932w, assets/hero.jpg 1597w"
       imagesizes="100vw" fetchpriority="high" />
 
-<link rel="stylesheet" href="assets/style.css?v=24" />
+<link rel="stylesheet" href="assets/style.css?v=25" />
 
 <!-- No-JS fallback: if scripts don't run, lift the opening film, unlock scroll,
      and reveal all content so the site is never trapped behind the gate. -->
@@ -350,16 +350,33 @@
     </form>
 
     <div class="admin__panel" id="adminPanel" hidden>
-      <div class="admin__bar">
-        <p class="admin__summary" id="adminSummary">&nbsp;</p>
+      <!-- Counts first: the question the couple actually open this to answer is
+           "how many are coming?", not "who replied most recently". -->
+      <dl class="admin__stats">
+        <div class="stat"><dd class="stat__n" id="statComing">0</dd><dt class="stat__l">Coming</dt></div>
+        <div class="stat"><dd class="stat__n" id="statHeads">0</dd><dt class="stat__l">Guests</dt></div>
+        <div class="stat"><dd class="stat__n" id="statDeclined">0</dd><dt class="stat__l">Declined</dt></div>
+        <div class="stat"><dd class="stat__n" id="statRooms">0</dd><dt class="stat__l">Rooms booked</dt></div>
+      </dl>
+
+      <div class="admin__tools">
+        <input type="search" id="adminSearch" class="admin__search" placeholder="Search a name or email"
+               aria-label="Search the guest list" autocomplete="off" />
+        <div class="segmented" role="group" aria-label="Filter replies">
+          <button type="button" data-filter="all" class="is-on">All</button>
+          <button type="button" data-filter="yes">Coming</button>
+          <button type="button" data-filter="no">Declined</button>
+        </div>
         <button class="btn btn--ghost" type="button" id="downloadCsv">Download CSV</button>
       </div>
+
+      <p class="admin__summary" id="adminSummary" role="status"></p>
       <div class="admin__list" id="adminList"></div>
       <input type="file" id="adminPhotoInput" accept="image/*" hidden />
     </div>
   </div>
 </section>
 
-<script src="assets/app.js?v=23"></script>
+<script src="assets/app.js?v=24"></script>
 </body>
 </html>

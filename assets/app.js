@@ -764,41 +764,122 @@
         }).catch(() => { adminErr.textContent = "Couldn’t reach the guest list. Please try again."; });
       });
 
+      /* ----- the guest list -----
+         A reading view first: who they are, whether they're coming, and the few
+         facts worth scanning. Editing (bio, photo, status, removal) sits behind a
+         per-guest "Edit" disclosure. Previously every row carried five link
+         buttons and an always-open text field, so the controls outweighed the
+         content and the list stopped being readable past a couple of replies. */
+      let adminFilter = "all";
+      let adminQuery = "";
+      const adminExpanded = {};      // id → true, so saving doesn't collapse the card
+      let adminConfirmRemove = null; // id awaiting an inline confirm
+
+      const whenLabel = (iso) => {
+        const d = new Date(iso || "");
+        return isNaN(d.getTime()) ? "" : d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+      };
+
+      function adminMatches(g) {
+        if (adminFilter !== "all" && g.attending !== adminFilter) return false;
+        if (!adminQuery) return true;
+        return ((g.name || "") + " " + (g.email || "")).toLowerCase().indexOf(adminQuery) > -1;
+      }
+
+      const fact = (label, value, cls) => value
+        ? '<div class="fact"><dt>' + label + '</dt><dd' + (cls ? ' class="' + cls + '"' : "") + ">" + value + "</dd></div>"
+        : "";
+
+      function adminEditHtml(g, photo) {
+        if (adminConfirmRemove === g.id) {
+          return '<p class="gcard__warn">Remove <strong>' + esc(g.name) + "</strong> and their reply for good? This can’t be undone.</p>" +
+            '<div class="gcard__actions">' +
+              '<button type="button" class="link-btn link-btn--danger" data-remove-yes="' + g.id + '">Yes, remove</button>' +
+              '<button type="button" class="link-btn" data-remove-no="' + g.id + '">Cancel</button>' +
+            "</div>";
+        }
+        return '<label class="gcard__field"><span>Bio — shown publicly on the guest list</span>' +
+            '<input type="text" class="admin-bio-input" maxlength="140" placeholder="A line about them…" value="' +
+              esc(g.bio || "") + '" data-bio="' + g.id + '" /></label>' +
+          '<div class="gcard__actions">' +
+            '<button type="button" class="link-btn" data-savebio="' + g.id + '">Save bio</button>' +
+            '<button type="button" class="link-btn" data-photo="' + g.id + '">' + (photo ? "Replace photo" : "Add photo") + "</button>" +
+            (photo ? '<button type="button" class="link-btn" data-delphoto="' + g.id + '">Remove photo</button>' : "") +
+            '<button type="button" class="link-btn" data-toggle="' + g.id + '">' + (g.attending === "yes" ? "Mark declined" : "Mark coming") + "</button>" +
+            '<button type="button" class="link-btn link-btn--danger" data-remove="' + g.id + '">Remove guest</button>' +
+          "</div>";
+      }
+
       function renderAdmin() {
         const yes = adminGuests.filter((g) => g.attending === "yes");
+        const no = adminGuests.filter((g) => g.attending === "no");
         const heads = yes.reduce((s, g) => s + (Number(g.party) || 1), 0);
-        adminSummary.textContent = adminGuests.length + (adminGuests.length === 1 ? " reply" : " replies") + " · " +
-          yes.length + " coming (" + heads + (heads === 1 ? " guest" : " guests") + ") · " +
-          adminGuests.filter((g) => g.attending === "no").length + " declined";
+        $("#statComing").textContent = yes.length;
+        $("#statHeads").textContent = heads;
+        $("#statDeclined").textContent = no.length;
+        $("#statRooms").textContent = yes.filter((g) => g.roomBooked === "yes").length;
+
+        const shown = adminGuests.slice()
+          .sort((a, b) => (b.updated || "").localeCompare(a.updated || ""))
+          .filter(adminMatches);
+
+        adminSummary.textContent = !adminGuests.length ? ""
+          : shown.length === adminGuests.length
+            ? adminGuests.length + (adminGuests.length === 1 ? " reply" : " replies")
+            : "Showing " + shown.length + " of " + adminGuests.length;
+
         adminList.innerHTML = "";
-        adminGuests.slice().sort((a, b) => (b.updated || "").localeCompare(a.updated || "")).forEach((g) => {
-          const row = document.createElement("div");
-          row.className = "admin-row";
-          const party = g.attending === "yes" ? "party of " + (g.party || 1) + ((g.companions && g.companions.length) ? ": " + esc(g.companions.join(", ")) : "") : "";
+        if (!shown.length) {
+          const empty = document.createElement("p");
+          empty.className = "admin__empty";
+          empty.textContent = adminGuests.length ? "No one matches that." : "Replies will appear here as they come in.";
+          adminList.appendChild(empty);
+          return;
+        }
+
+        shown.forEach((g) => {
+          const card = document.createElement("article");
+          card.className = "gcard" + (g.attending === "yes" ? "" : " is-declined");
           const photo = safePhoto(g.photo);
           const avatar = photo
             ? '<span class="admin-avatar"><img src="' + photo + '" alt="" /></span>'
-            : '<span class="admin-avatar admin-avatar--ph" aria-hidden="true">' + esc(initialsOf(g.name)) + '</span>';
-          row.innerHTML =
-            '<div class="admin-row__id">' + avatar +
-              '<div class="admin-row__main"><span class="admin-row__name">' + esc(g.name) + '</span>' +
-              '<span class="admin-row__email">' + esc(g.email) + '</span></div></div>' +
-            '<div class="admin-row__meta"><span class="tag ' + (g.attending === "yes" ? "tag--yes" : "tag--no") + '">' + (g.attending === "yes" ? "Coming" : "Declined") + '</span>' +
-            (party ? '<span class="admin-row__party">' + party + '</span>' : "") +
-            (g.song ? '<span class="admin-row__song">♪ ' + esc(g.song) + '</span>' : "") +
-            (g.roomBooked ? '<span class="admin-row__room tag ' + (g.roomBooked === "yes" ? "tag--yes" : "tag--no") + '">Room: ' + (g.roomBooked === "yes" ? "booked" : "not yet") + '</span>' : "") +
-            (g.note ? '<span class="admin-row__note">“' + esc(g.note) + '”</span>' : "") + '</div>' +
-            '<div class="admin-row__actions"><button type="button" class="link-btn" data-toggle="' + g.id + '">' + (g.attending === "yes" ? "Mark declined" : "Mark coming") + '</button>' +
-            '<button type="button" class="link-btn link-btn--danger" data-remove="' + g.id + '">Remove</button></div>' +
-            '<div class="admin-row__bio">' +
-              '<input type="text" class="admin-bio-input" maxlength="140" placeholder="Add a little bio for the guest list…" value="' + esc(g.bio || "") + '" data-bio="' + g.id + '" aria-label="Bio for ' + esc(g.name) + '" />' +
-              '<button type="button" class="link-btn" data-savebio="' + g.id + '">Save bio</button>' +
-              '<button type="button" class="link-btn" data-photo="' + g.id + '">' + (photo ? "Replace photo" : "Add photo") + '</button>' +
-              (photo ? '<button type="button" class="link-btn link-btn--danger" data-delphoto="' + g.id + '">Remove photo</button>' : "") +
-            '</div>';
-          adminList.appendChild(row);
+            : '<span class="admin-avatar admin-avatar--ph" aria-hidden="true">' + esc(initialsOf(g.name)) + "</span>";
+          const withWhom = (g.companions && g.companions.length)
+            ? ' <span class="fact__sub">with ' + esc(g.companions.join(", ")) + "</span>" : "";
+          const open = !!adminExpanded[g.id];
+
+          card.innerHTML =
+            '<header class="gcard__head">' + avatar +
+              '<div class="gcard__who">' +
+                '<h3 class="gcard__name">' + esc(g.name) + "</h3>" +
+                '<a class="gcard__email" href="mailto:' + esc(g.email) + '">' + esc(g.email) + "</a>" +
+              "</div>" +
+              '<span class="pill ' + (g.attending === "yes" ? "pill--yes" : "pill--no") + '">' +
+                (g.attending === "yes" ? "Coming" : "Declined") + "</span>" +
+            "</header>" +
+            '<dl class="gcard__facts">' +
+              (g.attending === "yes" ? fact("Party", esc(String(g.party || 1)) + withWhom) : "") +
+              fact("Room", g.roomBooked ? (g.roomBooked === "yes" ? "Booked" : "Not yet") : "") +
+              fact("Song", g.song ? esc(g.song) : "", "fact--song") +
+              fact("Bio", g.bio ? esc(g.bio) : "") +
+              fact("Note", g.note ? "“" + esc(g.note) + "”" : "", "fact--note") +
+            "</dl>" +
+            '<div class="gcard__foot">' +
+              '<button type="button" class="gcard__editbtn" data-edit="' + g.id + '" aria-expanded="' + open + '">' +
+                (open ? "Done" : "Edit") + "</button>" +
+              (g.updated ? '<span class="gcard__when">Replied ' + esc(whenLabel(g.updated)) + "</span>" : "") +
+            "</div>" +
+            '<div class="gcard__edit"' + (open ? "" : " hidden") + ">" + adminEditHtml(g, photo) + "</div>";
+          adminList.appendChild(card);
         });
+
         const reload = (res) => { adminGuests = res.guests || adminGuests; renderAdmin(); loadGuestList(); };
+        $$("[data-edit]", adminList).forEach((b) => b.addEventListener("click", () => {
+          const id = b.getAttribute("data-edit");
+          if (adminExpanded[id]) { delete adminExpanded[id]; adminConfirmRemove = null; }
+          else adminExpanded[id] = true;
+          renderAdmin();
+        }));
         $$("[data-toggle]", adminList).forEach((b) => b.addEventListener("click", () => {
           const id = b.getAttribute("data-toggle"), g = adminGuests.find((x) => x.id === id);
           const next = g.attending === "yes" ? "no" : "yes";
@@ -807,11 +888,19 @@
           // though their companions were still on record. Counts already ignore
           // anyone declined, so the stored number is safe to leave alone.
           const restored = (g.companions && g.companions.length) ? 1 + g.companions.length : (g.party || 1);
+          b.textContent = "Saving…"; b.disabled = true;
           api.adminUpdate(adminPw, id, next === "yes" ? { attending: next, party: restored } : { attending: next }).then(reload);
         }));
         $$("[data-remove]", adminList).forEach((b) => b.addEventListener("click", () => {
-          const id = b.getAttribute("data-remove"), g = adminGuests.find((x) => x.id === id);
-          if (!window.confirm("Remove " + (g ? g.name : "this guest") + " from the list?")) return;
+          adminConfirmRemove = b.getAttribute("data-remove"); renderAdmin();
+        }));
+        $$("[data-remove-no]", adminList).forEach((b) => b.addEventListener("click", () => {
+          adminConfirmRemove = null; renderAdmin();
+        }));
+        $$("[data-remove-yes]", adminList).forEach((b) => b.addEventListener("click", () => {
+          const id = b.getAttribute("data-remove-yes");
+          b.textContent = "Removing…"; b.disabled = true;
+          adminConfirmRemove = null; delete adminExpanded[id];
           api.adminRemove(adminPw, id).then(reload);
         }));
         $$("[data-savebio]", adminList).forEach((b) => b.addEventListener("click", () => {
@@ -828,6 +917,17 @@
           api.adminUpdate(adminPw, b.getAttribute("data-delphoto"), { photo: "" }).then(reload);
         }));
       }
+
+      // Search + filter are wired once; they only change what renderAdmin shows.
+      const adminSearch = $("#adminSearch");
+      if (adminSearch) adminSearch.addEventListener("input", () => {
+        adminQuery = adminSearch.value.trim().toLowerCase(); renderAdmin();
+      });
+      $$(".segmented [data-filter]").forEach((b) => b.addEventListener("click", () => {
+        adminFilter = b.getAttribute("data-filter");
+        $$(".segmented [data-filter]").forEach((x) => x.classList.toggle("is-on", x === b));
+        renderAdmin();
+      }));
 
       const csvBtn = $("#downloadCsv");
       const csvCell = (v) => { v = String(v == null ? "" : v); return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
