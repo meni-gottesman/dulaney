@@ -792,28 +792,85 @@ body.entered .hero__date { opacity: 1; transform: translateY(0); }
 .admin__gate { display: grid; gap: 1rem; max-width: 22rem; }
 .admin__gate[hidden] { display: none; }
 .admin__gate input { width: 100%; }
-.admin__bar { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; padding-bottom: 1.2rem; border-bottom: 1px solid var(--border); }
-.admin__summary { margin: 0; font-family: var(--font-sans); font-size: 0.74rem; letter-spacing: 0.04em; color: var(--charcoal); }
+.admin__summary { margin: 0 0 0.9rem; font-family: var(--font-sans); font-size: 0.68rem;
+                  letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted-fg); }
+.admin__summary:empty { display: none; }
 .btn--ghost { margin: 0; background: none; color: var(--fg); border-color: var(--border); padding: 0.7rem 1.6rem; font-size: 0.68rem; }
 .btn--ghost:hover { background: var(--fg); color: var(--bg); transform: none; }
-.admin__list { display: grid; gap: 0; }
-.admin-row { display: grid; gap: 0.4rem 1rem; grid-template-columns: 1fr; padding: 1.1rem 0; border-bottom: 1px solid var(--border); }
-@media (min-width: 640px){ .admin-row { grid-template-columns: 1.2fr 1.4fr auto; align-items: center; } }
-.admin-row__main { display: grid; gap: 0.15rem; }
-.admin-row__name { font-family: var(--font-display); font-size: 1.25rem; color: var(--fg); }
-.admin-row__song { color: var(--accent); font-style: italic; }
-.admin-row__id { display: flex; align-items: center; gap: 0.8rem; min-width: 0; }
-.admin-avatar { flex: 0 0 auto; width: 46px; height: 46px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: color-mix(in oklch, var(--soft) 55%, var(--border)); }
+/* --- Hosts: counts, tools, and the guest cards ---------------------------
+   The list is for reading first. Controls stay out of the way until asked
+   for, and each guest gets real breathing room instead of one dense line. */
+.admin__stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; margin: 0 0 1.6rem;
+                background: var(--border); border: 1px solid var(--border); }
+@media (min-width: 560px) { .admin__stats { grid-template-columns: repeat(4, 1fr); } }
+.stat { background: var(--bg); padding: 1.05rem 1.2rem; display: grid; gap: 0.18rem; }
+.stat__n { margin: 0; font-family: var(--font-display); font-size: 2rem; line-height: 1; color: var(--fg); }
+.stat__l { font-family: var(--font-sans); text-transform: uppercase; letter-spacing: 0.18em;
+           font-size: 0.56rem; color: var(--muted-fg); }
+
+.admin__tools { display: flex; flex-wrap: wrap; gap: 0.7rem; align-items: center; margin-bottom: 0.9rem; }
+.admin__search { flex: 1 1 13rem; min-width: 0; font-family: var(--font-sans); font-size: 0.88rem;
+                 color: var(--fg); background: var(--bg); border: 1px solid var(--border);
+                 border-radius: var(--radius); padding: 0.62rem 0.8rem; }
+.admin__search:focus { border-color: var(--accent); outline: none; }
+.admin__search::placeholder { color: var(--muted-fg); }
+.segmented { display: flex; border: 1px solid var(--border); }
+.segmented button { background: none; border: 0; cursor: pointer; font-family: var(--font-sans);
+                    text-transform: uppercase; letter-spacing: 0.16em; font-size: 0.58rem;
+                    color: var(--muted-fg); padding: 0.66rem 0.9rem; }
+.segmented button + button { border-left: 1px solid var(--border); }
+.segmented button:hover { color: var(--fg); }
+.segmented button.is-on { background: var(--fg); color: var(--bg); }
+.admin__empty { font-family: var(--font-sans); font-size: 0.88rem; color: var(--muted-fg); padding: 2.4rem 0; }
+
+.admin__list { display: grid; gap: 0.9rem; }
+.gcard { background: var(--soft); border: 1px solid var(--border); padding: 1.3rem 1.4rem; display: grid; gap: 1rem; }
+.gcard.is-declined { opacity: 0.62; }
+/* Wraps so a long name pushes the status pill onto its own line instead of
+   squeezing itself to a couple of characters. */
+.gcard__head { display: flex; align-items: center; gap: 0.6rem 0.9rem; flex-wrap: wrap; }
+.gcard__who { display: grid; gap: 0.1rem; min-width: 0; flex: 1 1 auto; }
+.gcard__name { font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; line-height: 1.15; margin: 0; color: var(--fg); }
+.gcard__email { font-family: var(--font-sans); font-size: 0.74rem; color: var(--muted-fg);
+                text-decoration: none; overflow-wrap: anywhere; }
+.gcard__email:hover { color: var(--accent); }
+.admin-avatar { flex: 0 0 auto; width: 48px; height: 48px; border-radius: 50%; overflow: hidden;
+                display: grid; place-items: center; background: color-mix(in oklch, var(--soft) 55%, var(--border)); }
 .admin-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .admin-avatar--ph { font-family: var(--font-display); font-weight: 500; color: var(--accent); }
-.admin-row__bio { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 0.5rem 0.8rem; align-items: center; margin-top: 0.5rem; }
-.admin-bio-input { flex: 1 1 14rem; min-width: 0; font-family: var(--font-sans); font-size: 0.92rem; color: var(--fg); background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.5rem 0.7rem; }
+
+.pill { flex: 0 0 auto; align-self: flex-start; font-family: var(--font-sans); text-transform: uppercase;
+        letter-spacing: 0.16em; font-size: 0.56rem; padding: 0.34rem 0.7rem; border-radius: 999px; }
+.pill--yes { background: color-mix(in oklch, var(--palm) 18%, transparent); color: var(--palm); }
+.pill--no { background: color-mix(in oklch, var(--muted-fg) 16%, transparent); color: var(--muted-fg); }
+
+/* Label/value pairs, so each fact is self-describing rather than a loose chip. */
+.gcard__facts { margin: 0; display: grid; gap: 0.55rem; }
+.fact { display: grid; grid-template-columns: 5.5rem 1fr; gap: 0.2rem 1rem; align-items: baseline; }
+.fact dt { font-family: var(--font-sans); text-transform: uppercase; letter-spacing: 0.16em;
+           font-size: 0.56rem; color: var(--muted-fg); }
+.fact dd { margin: 0; font-size: 0.94rem; line-height: 1.5; color: var(--charcoal); overflow-wrap: anywhere; }
+.fact__sub { color: var(--muted-fg); }
+.fact--song { color: var(--accent); font-style: italic; }
+.fact--note { font-style: italic; color: var(--muted-fg); }
+
+.gcard__foot { display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+               border-top: 1px solid var(--border); padding-top: 0.85rem; }
+.gcard__editbtn { background: none; border: 0; cursor: pointer; font-family: var(--font-sans);
+                  text-transform: uppercase; letter-spacing: 0.2em; font-size: 0.6rem; color: var(--accent); padding: 0; }
+.gcard__editbtn:hover { color: var(--fg); }
+.gcard__when { font-family: var(--font-sans); font-size: 0.62rem; letter-spacing: 0.06em; color: var(--muted-fg); }
+.gcard__edit { display: grid; gap: 0.85rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+.gcard__edit[hidden] { display: none; }
+.gcard__field { display: grid; gap: 0.35rem; }
+.gcard__field span { font-family: var(--font-sans); text-transform: uppercase; letter-spacing: 0.16em;
+                     font-size: 0.56rem; color: var(--muted-fg); }
+.gcard__actions { display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem; }
+.gcard__warn { margin: 0; font-size: 0.92rem; line-height: 1.55; color: var(--charcoal); }
+.gcard__warn strong { color: var(--fg); }
+.admin-bio-input { width: 100%; min-width: 0; font-family: var(--font-sans); font-size: 0.92rem; color: var(--fg);
+                   background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.55rem 0.75rem; }
 .admin-bio-input:focus { border-color: var(--accent); outline: none; }
-.admin-row__email { font-family: var(--font-sans); font-size: 0.72rem; color: var(--muted-fg); word-break: break-all; }
-.admin-row__meta { display: flex; flex-wrap: wrap; gap: 0.5rem 0.8rem; align-items: baseline; font-size: 0.78rem; color: var(--charcoal); }
-.admin-row__note { font-style: italic; color: var(--muted-fg); }
-.admin-row__actions { display: flex; gap: 1rem; }
-.admin-row__actions .link-btn { justify-self: auto; }
 .tag { font-family: var(--font-sans); text-transform: uppercase; letter-spacing: 0.16em; font-size: 0.58rem; padding: 0.25rem 0.6rem; border-radius: 999px; }
 .tag--yes { background: color-mix(in oklch, var(--palm) 18%, transparent); color: var(--palm); }
 .tag--no { background: color-mix(in oklch, var(--muted-fg) 16%, transparent); color: var(--muted-fg); }
