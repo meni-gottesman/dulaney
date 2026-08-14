@@ -190,7 +190,7 @@
     // showed itself as "playing". Restart from where the music comes in; replaying
     // the envelope-opening sound mid-visit would make no sense.
     if (audioEl.ended || (audioEl.duration && audioEl.currentTime >= audioEl.duration - 0.25)) {
-      try { audioEl.currentTime = 7.0; } catch (e) {}
+      try { audioEl.currentTime = SCORE_IN; } catch (e) {}
     }
     if (audioEl.paused) {
       const p = audioEl.play(); if (p && p.catch) p.catch(function () {});
@@ -206,8 +206,26 @@
     try { localStorage.setItem("nevis_audio", "off"); } catch (e) {}
   }
 
+  // ---- looping the score ----------------------------------------------------
+  // The couple asked for the music to keep playing rather than stop after one
+  // pass. The score is baked into the film: envelope sound for the first ~5s,
+  // the music settled by 7s, and a deliberate fade-out from ~61.3s to the end
+  // at 65.16s. Looping the element itself would replay the envelope sound, and
+  // running to the end would fade to silence and then lurch back in — so it
+  // turns over early instead, at a beat-aligned point that never reaches the
+  // fade. Measured off the track: 96.2 BPM, so a bar is 2.496s; 20 bars from
+  // SCORE_IN is five four-bar phrases and stops 4.4s short of the fade.
+  const SCORE_IN = 7.0;
+  const SCORE_OUT = SCORE_IN + 20 * 2.496;   // 56.92s
+
   if (audioEl) {
-    // The score runs ~1:05 and ends on its own fade-out; reflect that in the control.
+    audioEl.addEventListener("timeupdate", function () {
+      if (audioEl.currentTime >= SCORE_OUT) {
+        try { audioEl.currentTime = SCORE_IN; } catch (e) {}
+      }
+    });
+    // Kept as a backstop: if a browser ever runs past SCORE_OUT (a stall, a
+    // dropped timeupdate), don't leave the control claiming it's still playing.
     audioEl.addEventListener("ended", function () { isOn = false; setAudioUI(false); });
     audioEl.addEventListener("playing", function () { if (!audioEl.muted) { isOn = true; setAudioUI(true); } });
   }
@@ -232,15 +250,20 @@
   const menu = $("#menu");
   const navToggle = $("#navToggle");
 
-  const headerObs = new IntersectionObserver(
-    ([e]) => {
-      header.classList.toggle("on-hero", e.isIntersecting && e.intersectionRatio > 0.1);
-      header.classList.toggle("scrolled", !(e.isIntersecting && e.intersectionRatio > 0.1));
-    },
-    { threshold: [0, 0.1, 0.9] }
-  );
-  if (hero) headerObs.observe(hero);
+  if (header && hero) {
+    new IntersectionObserver(
+      ([e]) => {
+        header.classList.toggle("on-hero", e.isIntersecting && e.intersectionRatio > 0.1);
+        header.classList.toggle("scrolled", !(e.isIntersecting && e.intersectionRatio > 0.1));
+      },
+      { threshold: [0, 0.1, 0.9] }
+    ).observe(hero);
+  }
 
+  // Not every page carries the menu overlay — /hosts/ deliberately doesn't.
+  // Without this guard the null deref threw here and aborted the whole file,
+  // so nothing below it (including the Hosts panel) ever initialised.
+  if (menu && navToggle) {
   function setMenu(open) {
     menu.classList.toggle("is-open", open);
     body.classList.toggle("menu-open", open);
@@ -257,6 +280,7 @@
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && menu.classList.contains("is-open")) { setMenu(false); navToggle.focus(); }
   });
+  } /* end if (menu && navToggle) */
 
   /* ---------- SCROLL REVEALS ---------- */
   const reveals = $$(".reveal");
@@ -462,8 +486,19 @@
      flow can be shown before the couple connects their Sheet. The admin password
      is verified SERVER-SIDE by the Apps Script in live mode. */
   (function rsvp() {
+    // Three independent pieces share this module's data layer: the reply form and
+    // the public list (home page), and the Hosts panel (its own page at /hosts/).
+    // Any of them may be absent, so each is guarded rather than assumed.
     const form = $("#rsvpForm");
-    if (!form) return;
+    const admin = $("#admin");
+    if (!form && !admin) return;
+
+    // Read outside the form block — the public list is gated on whether this
+    // device has already replied, and that check has to work with no form present.
+    const savedReply = function () {
+      try { return JSON.parse(localStorage.getItem("nevis_my_rsvp") || "null"); } catch (x) { return null; }
+    };
+    const hasReplied = function () { const m = savedReply(); return !!(m && m.email); };
 
     // ===== CONFIG — set these to go live ===================================
     // Paste the Apps Script web-app URL (…/exec). Empty = local demo mode.
@@ -554,6 +589,7 @@
       },
     };
 
+    if (form) {
     /* ----- companions (who's coming with you) ----- */
     const companionsWrap = $("#companions");
     function addCompanion(value) {
@@ -657,9 +693,6 @@
     }
 
     /* ----- a reply already sent from this device ----- */
-    const savedReply = function () {
-      try { return JSON.parse(localStorage.getItem("nevis_my_rsvp") || "null"); } catch (x) { return null; }
-    };
     function fillFormFromSaved(mine) {
       if (!mine) return;
       $("#guestName").value = mine.name || "";
@@ -688,12 +721,25 @@
       fillFormFromSaved(savedReply());
       form.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "center" });
     });
+    } /* end if (form) */
 
-    /* ----- public guest list ----- */
+    /* ----- public guest list -----
+       Held back until this device has replied: the couple didn't want arriving
+       guests to read the list before saying whether they're coming. */
     const glItems = $("#guestlistItems");
     const glCount = $("#guestlistCount");
     const glEmpty = $("#guestlistEmpty");
+    const glLocked = $("#guestlistLocked");
     function loadGuestList() {
+      if (!glItems) return;
+      if (!hasReplied()) {
+        glItems.innerHTML = "";
+        glCount.innerHTML = "&nbsp;";
+        if (glEmpty) glEmpty.hidden = true;
+        if (glLocked) glLocked.hidden = false;
+        return;
+      }
+      if (glLocked) glLocked.hidden = true;
       api.listPublic().then((guests) => {
         glItems.innerHTML = "";
         if (!guests.length) { glCount.innerHTML = "&nbsp;"; glEmpty.hidden = false; return; }
@@ -722,7 +768,6 @@
     loadGuestList();
 
     /* ----- hosts admin (password-gated) ----- */
-    const admin = $("#admin");
     if (admin) {
       const adminGate = $("#adminGate");
       const adminPanel = $("#adminPanel");
@@ -742,12 +787,12 @@
           .catch(function () { adminSummary.textContent = "That image didn’t work — please try another."; });
       });
 
-      const openAdmin = () => { admin.hidden = false; body.classList.add("menu-open"); lockBackground(admin); $("#adminPw").focus(); };
-      const closeAdmin = () => { admin.hidden = true; body.classList.remove("menu-open"); unlockBackground(); if (location.hash === "#admin") history.replaceState(null, "", location.pathname + location.search); };
-      const hostsLink = $("#hostsLink"); if (hostsLink) hostsLink.addEventListener("click", (e) => { e.preventDefault(); openAdmin(); });
-      const adminCloseBtn = $("#adminClose"); if (adminCloseBtn) adminCloseBtn.addEventListener("click", closeAdmin);
-      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !admin.hidden) { closeAdmin(); if (hostsLink) hostsLink.focus(); } });
-      if (location.hash === "#admin") openAdmin();
+      // The Hosts panel is its own page (/hosts/), so it is simply the content —
+      // no overlay to open, nothing to hide behind, and no focus trap to get
+      // wrong. (As an overlay it was layered over the opening film, which had
+      // already marked it inert, and the password field could not be clicked.)
+      admin.hidden = false;
+      $("#adminPw").focus();
 
       adminGate.addEventListener("submit", (e) => {
         e.preventDefault();
