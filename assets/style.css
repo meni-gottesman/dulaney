@@ -1011,30 +1011,40 @@ body.entered .hero__date { opacity: 1; transform: translateY(0); }
   letter-spacing: 0.28em; font-size: 0.6rem; text-align: center;
   color: color-mix(in oklch, var(--ivory) 82%, transparent);
 }
+/* gap:0 and a shared backdrop — the figures are cut to a common scale and
+   baseline, so butted together they read as ONE lined-up photograph while each
+   remains its own tappable tile. */
+/* flex, not grid: an 11-figure line-up leaves a partial last row, and flex can
+   centre it so it reads as deliberate rather than ragged. */
 .lookbook__grid {
-  display: grid; gap: clamp(0.4rem, 1.2vw, 0.7rem); min-width: 0;
-  grid-template-columns: repeat(auto-fill, minmax(clamp(5.5rem, 11vw, 7.5rem), 1fr));
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 0; min-width: 0;
+  background: #e8e8e8; border: 1px solid rgba(241, 235, 223, 0.14);
 }
-/* Fixed counts on small screens — auto-fill packs far too many at phone widths. */
-@media (max-width: 700px) { .lookbook__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-@media (max-width: 480px) { .lookbook__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.lookbook__grid > .look { flex: 0 0 20%; max-width: 20%; }
+@media (max-width: 700px) { .lookbook__grid > .look { flex-basis: 25%; max-width: 25%; } }
+@media (max-width: 480px) { .lookbook__grid > .look { flex-basis: 33.3333%; max-width: 33.3333%; } }
+
 /* Four looks shouldn't stretch to the full width of eleven. */
 .lookbook__grid--him { max-width: 32rem; margin: 0 auto; }
+.lookbook__grid--him > .look { flex-basis: 25%; max-width: 25%; }
 .lookbook .look { margin: 0; padding: 0; background: none; border: 0; cursor: zoom-in; }
 /* Has to out-specify the gallery's `.tile .duo { height: auto }` (two classes) —
    a one-class selector silently loses and the cards render at natural height. */
 .lookbook .tile .duo {
   display: block; width: 100%; aspect-ratio: 2 / 3; height: auto;
   object-fit: cover; object-position: center;
-  background: #e8e8e8; border: 1px solid rgba(241, 235, 223, 0.12);
-  transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.4s ease, opacity 1s ease;
+  background: #e8e8e8; border: 0;
+  transition: opacity 1s ease, filter 0.35s ease;
 }
+/* No lift or scale — either would tear the seam between neighbouring figures.
+   The tapped figure brightens against its neighbours instead. */
+.lookbook .tile:hover .duo.loaded { filter: brightness(1.06); }
+.lookbook .tile:not(:hover) .duo.loaded { filter: none; }
 /* The gallery scales its tiles; these lift — a pale card growing inside a dark
    frame reads as a glitch. */
-.lookbook .tile:hover .duo.loaded,
-.lookbook .tile:focus-visible .duo.loaded { transform: translateY(-3px); border-color: rgba(241, 235, 223, 0.45); }
+
 .lookbook .look:focus-visible { outline: none; }
-.lookbook .look:focus-visible .duo { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lookbook .look:focus-visible .duo { outline: 2px solid var(--accent); outline-offset: -2px; }
 .lookbook__hint {
   text-align: center; margin: 1.8rem 0 0; font-family: var(--font-sans);
   font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase;
@@ -1042,5 +1052,5 @@ body.entered .hero__date { opacity: 1; transform: translateY(0); }
 }
 @media (prefers-reduced-motion: reduce) {
   .lookbook .tile .duo { transition: none; }
-  .lookbook .tile:hover .duo.loaded { transform: none; }
+  .lookbook .tile:hover .duo.loaded { filter: none; }
 }
