@@ -1020,13 +1020,14 @@ body.entered .hero__date { opacity: 1; transform: translateY(0); }
   display: flex; flex-wrap: wrap; justify-content: center; gap: 0; min-width: 0;
   background: #e8e8e8; border: 1px solid rgba(241, 235, 223, 0.14);
 }
-.lookbook__grid > .look { flex: 0 0 20%; max-width: 20%; }
-@media (max-width: 700px) { .lookbook__grid > .look { flex-basis: 25%; max-width: 25%; } }
-@media (max-width: 480px) { .lookbook__grid > .look { flex-basis: 33.3333%; max-width: 33.3333%; } }
+/* four across: 8 women and 4 men both tile into whole rows, so the board
+   is a clean rectangle with no stranded figure. */
+.lookbook__grid > .look { flex: 0 0 25%; max-width: 25%; }
+@media (max-width: 700px) { .lookbook__grid > .look { flex-basis: 33.3333%; max-width: 33.3333%; } }
+@media (max-width: 480px) { .lookbook__grid > .look { flex-basis: 50%; max-width: 50%; } }
 
 /* Four looks shouldn't stretch to the full width of eleven. */
 .lookbook__grid--him { max-width: 32rem; margin: 0 auto; }
-.lookbook__grid--him > .look { flex-basis: 25%; max-width: 25%; }
 .lookbook .look { margin: 0; padding: 0; background: none; border: 0; cursor: zoom-in; }
 /* Has to out-specify the gallery's `.tile .duo { height: auto }` (two classes) —
    a one-class selector silently loses and the cards render at natural height. */
