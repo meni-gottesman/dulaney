@@ -989,7 +989,7 @@
   })();
 
   /* ---------- GALLERY: fade images in on load + lightbox ---------- */
-  const galleryImgs = $$(".gallery-grid .duo");
+  const galleryImgs = $$(".duo");
   galleryImgs.forEach((img) => {
     if (img.complete && img.naturalWidth > 0) img.classList.add("loaded");
     else img.addEventListener("load", () => img.classList.add("loaded"), { once: true });
@@ -997,7 +997,9 @@
 
   (function lightbox() {
     const box = $("#lightbox"), bimg = $("#lightboxImg"), count = $("#lightboxCount");
-    const tiles = $$(".gallery-grid .tile");
+    // Any .tile on the page, not just the gallery grid — the dress-code
+    // inspiration boards on /details/ reuse this same viewer.
+    const tiles = $$(".tile");
     if (!box || !tiles.length) return;
     const items = tiles.map((t) => { const im = t.querySelector("img"); return { src: im.src, alt: im.alt }; });
     let idx = 0, lastFocus = null;

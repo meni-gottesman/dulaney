@@ -45,7 +45,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
 
-<link rel="stylesheet" href="/assets/style.css?v=26" />
+<link rel="stylesheet" href="/assets/style.css?v=27" />
 
 <!-- No-JS fallback: reveal all content if scripts don't run. -->
 <noscript><style>
@@ -256,6 +256,23 @@
     <p class="eyebrow" style="color:color-mix(in oklch, var(--ivory) 64%, transparent)">Dress Code</p>
     <h2 class="display dress-big reveal d1">Your best <em>in black</em></h2>
     <p class="lede dress-lede reveal d2">Eveningwear under island skies.</p>
+
+    <!-- McKenna's inspiration boards. Deliberately small on the page — two neat
+         cards — and opened full-size in the gallery's lightbox on tap, so the
+         section stays elegant instead of turning into a wall of collage. -->
+    <div class="lookbook reveal d3">
+      <figure class="tile lookbook__card" tabindex="0" role="button" aria-label="Open the inspiration for her, full size">
+        <img class="duo" src="/assets/dress-women.jpg" width="1124" height="2047"
+             alt="Inspiration for her — black gowns, minis, sheer layers and sharp tailoring" loading="lazy" decoding="async" />
+        <figcaption>For her</figcaption>
+      </figure>
+      <figure class="tile lookbook__card" tabindex="0" role="button" aria-label="Open the inspiration for him, full size">
+        <img class="duo" src="/assets/dress-men.jpg" width="1177" height="1888"
+             alt="Inspiration for him — black suiting, black shirts and black tie" loading="lazy" decoding="async" />
+        <figcaption>For him</figcaption>
+      </figure>
+    </div>
+    <p class="lookbook__hint reveal d3">Tap either board to see it full size.</p>
   </div>
 </section>
 
@@ -274,6 +291,16 @@
 
 </main>
 
+<!-- Shared image viewer — the dress-code boards above open in here. -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo">
+  <button class="lightbox__close" id="lightboxClose">Close</button>
+  <button class="lightbox__nav lightbox__prev" id="lightboxPrev" aria-label="Previous photo">&lsaquo;</button>
+  <img class="lightbox__img" id="lightboxImg" alt="" />
+  <button class="lightbox__nav lightbox__next" id="lightboxNext" aria-label="Next photo">&rsaquo;</button>
+  <p class="lightbox__count" id="lightboxCount"></p>
+</div>
+
+
 <footer class="pagefoot">
   <p class="pagefoot__mono">Dulaney</p>
   <nav class="pagefoot__nav" aria-label="Footer">
@@ -286,6 +313,6 @@
   <p class="pagefoot__credit">Created by <a href="https://menigottesman.com" target="_blank" rel="noopener">Meni Gottesman</a></p>
 </footer>
 
-<script src="/assets/app.js?v=25"></script>
+<script src="/assets/app.js?v=26"></script>
 </body>
 </html>

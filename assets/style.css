@@ -994,3 +994,51 @@ body.entered .hero__date { opacity: 1; transform: translateY(0); }
 
 /* The fine print beside the calendar buttons — Google only takes the weekend. */
 .cal__fine { display: block; margin-top: 0.45rem; font-size: 0.86em; color: var(--muted-fg); }
+
+/* --- Dress-code inspiration boards (/details/#dress) ---------------------
+   McKenna's two collages. On the page they are small, equal-height cards so
+   the whole board is legible but the section stays elegant; tapping either
+   opens it full size in the shared lightbox. The boards' own backdrop is a
+   light grey, so the label sits BELOW the card on the dark section rather
+   than over the image — over it, it washed out against the pale collage. */
+.lookbook {
+  display: grid; gap: clamp(0.9rem, 2.5vw, 1.6rem);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 40rem; margin: clamp(2.4rem, 6vw, 3.6rem) auto 0;
+}
+.lookbook__card { margin: 0; padding: 0; background: none; border: 0; cursor: zoom-in; }
+/* Selector has to out-specify `.tile .duo { height: auto }` from the gallery —
+   `.lookbook__card img` is one class + an element and silently lost, leaving
+   the boards at full natural height. contain, not cover: nothing gets cropped. */
+.lookbook .tile .duo {
+  display: block; width: 100%; height: clamp(15rem, 34vw, 22rem);
+  object-fit: contain; object-position: center;
+  background: #e8e8e8; border: 1px solid rgba(241, 235, 223, 0.14);
+  transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.4s ease, opacity 1s ease;
+}
+/* The gallery scales its tiles on hover; these lift instead — a light board
+   growing inside a dark frame reads as a glitch. */
+.lookbook .tile:hover .duo.loaded,
+.lookbook .tile:focus-visible .duo.loaded { transform: translateY(-4px); border-color: rgba(241, 235, 223, 0.42); }
+.lookbook__card:focus-visible { outline: none; }
+.lookbook__card:focus-visible .duo { outline: 2px solid var(--accent); outline-offset: 3px; }
+.lookbook__card figcaption {
+  margin-top: 0.85rem; font-family: var(--font-sans); text-transform: uppercase;
+  letter-spacing: 0.24em; font-size: 0.58rem; text-align: center;
+  color: color-mix(in oklch, var(--ivory) 66%, transparent);
+}
+.lookbook__hint {
+  text-align: center; margin: 1.6rem 0 0; font-family: var(--font-sans);
+  font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: color-mix(in oklch, var(--ivory) 46%, transparent);
+}
+/* Side by side, two boards fit a phone at ~137px wide — far too small to read
+   anything. One per row keeps them legible while still compact. */
+@media (max-width: 520px) {
+  .lookbook { grid-template-columns: 1fr; max-width: 22rem; }
+  .lookbook .tile .duo { height: clamp(17rem, 62vw, 21rem); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lookbook .tile .duo { transition: none; }
+  .lookbook .tile:hover .duo.loaded { transform: none; }
+}
