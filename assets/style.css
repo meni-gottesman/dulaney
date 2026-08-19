@@ -1026,8 +1026,8 @@ body.entered .hero__date { opacity: 1; transform: translateY(0); }
 @media (max-width: 700px) { .lookbook__grid > .look { flex-basis: 33.3333%; max-width: 33.3333%; } }
 @media (max-width: 480px) { .lookbook__grid > .look { flex-basis: 50%; max-width: 50%; } }
 
-/* Four looks shouldn't stretch to the full width of eleven. */
-.lookbook__grid--him { max-width: 32rem; margin: 0 auto; }
+/* Both boards share the full width so every figure renders at exactly the same
+   size — capping the men's row made those four 20% smaller than the women's. */
 .lookbook .look { margin: 0; padding: 0; background: none; border: 0; cursor: zoom-in; }
 /* Has to out-specify the gallery's `.tile .duo { height: auto }` (two classes) —
    a one-class selector silently loses and the cards render at natural height. */
