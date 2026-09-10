@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build assets/dulaney-nevis-2027.ics — the guest 'add to calendar' file.
 
-Five events: the weekend, the ceremony, and the three deadlines (each with a
+Four events: the weekend, the ceremony, and the two payment deadlines (each with a
 week-prior reminder). Nevis is AST/UTC-4 year-round, so the ceremony carries a
 fixed-offset VTIMEZONE — a guest sees their own local time at home and the true
 5:00 PM once they land.
@@ -10,6 +10,7 @@ Re-run after any date change:  python3 tools/make_ics.py
 """
 
 from urllib.parse import urlencode
+from pathlib import Path
 
 SITE = "https://destinationdulaney.com/"
 STAMP = "20260711T120000Z"
@@ -125,8 +126,6 @@ cal += event(
 )
 
 for uid, day, summary, note in [
-    ("rsvp-by", "20260901", "RSVP by today — Dulaney wedding",
-     "Kindly send your reply to Jaden & McKenna today."),
     ("deposit-due", "20261101", "Room deposit due — Dulaney wedding",
      "Deposit due to hold your room in the Dempsey–Dulaney Celebration block.\n"
      "Four Seasons Nevis reservations: (869) 469-1111."),
@@ -143,7 +142,8 @@ folded = []
 for line in cal:
     folded.extend(fold(line))
 
-out = "/Users/menigottesman/Desktop/nevis-affair/assets/dulaney-nevis-2027.ics"
+# Relative to this script — an absolute home path broke when the project moved.
+out = str(Path(__file__).resolve().parent.parent / "assets" / "dulaney-nevis-2027.ics")
 with open(out, "w", newline="") as f:
     f.write("\r\n".join(folded) + "\r\n")
 

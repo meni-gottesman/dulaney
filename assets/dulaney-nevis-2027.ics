@@ -44,22 +44,6 @@ LOCATION:Oceanfront 18th Lawn\, Four Seasons Resort Nevis\, Pinney's Beach\
  , Charlestown\, Nevis\, West Indies
 END:VEVENT
 BEGIN:VEVENT
-UID:rsvp-by@destinationdulaney.com
-DTSTAMP:20260711T120000Z
-DTSTART;VALUE=DATE:20260901
-DTEND;VALUE=DATE:20260902
-SUMMARY:RSVP by today — Dulaney wedding
-DESCRIPTION:Kindly send your reply to Jaden & McKenna today.\nhttps://desti
- nationdulaney.com/
-URL:https://destinationdulaney.com/
-TRANSP:TRANSPARENT
-BEGIN:VALARM
-ACTION:DISPLAY
-TRIGGER:-P7D
-DESCRIPTION:RSVP by today — Dulaney wedding
-END:VALARM
-END:VEVENT
-BEGIN:VEVENT
 UID:deposit-due@destinationdulaney.com
 DTSTAMP:20260711T120000Z
 DTSTART;VALUE=DATE:20261101
