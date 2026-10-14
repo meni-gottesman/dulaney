@@ -77,10 +77,6 @@ Edit text directly in the page's HTML; edit look‑and‑feel once in `assets/st
   # open http://localhost:8000
   ```
 
-> Note: on macOS, a server *launched from inside Claude* can't read `~/Desktop`
-> due to privacy protections — that's why the live preview was served from a copy
-> in `/tmp`. Running the command yourself in Terminal works fine.
-
 ---
 
 ## Update the live site
